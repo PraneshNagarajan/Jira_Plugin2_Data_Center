@@ -1,0 +1,1596 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jira Data Center Plugin — Complete Developer Reference</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #08090e;
+  --surface: #0f1117;
+  --card: #13151f;
+  --border: #1e2130;
+  --border2: #252840;
+  --amber: #fbbf24;
+  --amber2: #f59e0b;
+  --cyan: #22d3ee;
+  --violet: #a78bfa;
+  --green: #4ade80;
+  --red: #f87171;
+  --blue: #60a5fa;
+  --pink: #f472b6;
+  --orange: #fb923c;
+  --text: #e2e8f0;
+  --muted: #64748b;
+  --dim: #94a3b8;
+}
+
+html, body { width:100%; height:100%; overflow:hidden; background:var(--bg); color:var(--text); font-family:'Outfit',sans-serif; font-size:15px; line-height:1.6; }
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar { width:5px; height:5px; }
+::-webkit-scrollbar-track { background:var(--bg); }
+::-webkit-scrollbar-thumb { background:var(--border2); border-radius:3px; }
+
+/* ══════════════════════════════════════════
+   TOP NAV
+══════════════════════════════════════════ */
+.topnav {
+  position:fixed; top:0; left:0; right:0; height:50px;
+  background:rgba(8,9,14,0.96); backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--border);
+  display:flex; align-items:center; gap:0; z-index:200;
+  padding:0 20px;
+}
+.nav-logo { font-weight:800; font-size:0.88rem; color:var(--amber); margin-right:16px; letter-spacing:-0.5px; white-space:nowrap; flex-shrink:0; }
+.nav-tabs { display:flex; gap:2px; flex:1; overflow:hidden; }
+.nav-tab {
+  color:var(--muted); font-size:0.7rem; padding:4px 10px; border-radius:4px;
+  cursor:pointer; white-space:nowrap; border:none; background:none; font-family:'Outfit',sans-serif;
+  transition:all 0.2s; flex-shrink:0;
+}
+.nav-tab:hover { color:var(--text); background:var(--border); }
+.nav-tab.active { color:var(--amber); background:rgba(251,191,36,0.08); }
+.nav-right { display:flex; align-items:center; gap:8px; flex-shrink:0; }
+.slide-counter { font-family:'Fira Code',monospace; font-size:0.65rem; color:var(--muted); }
+.nav-arrow {
+  background:var(--surface); border:1px solid var(--border2); color:var(--dim);
+  padding:4px 12px; border-radius:5px; cursor:pointer; font-size:0.72rem;
+  font-family:'Fira Code',monospace; transition:all 0.2s;
+}
+.nav-arrow:hover { border-color:var(--amber); color:var(--amber); }
+.nav-arrow:disabled { opacity:0.25; cursor:default; }
+
+/* ══════════════════════════════════════════
+   SLIDE TRACK
+══════════════════════════════════════════ */
+.slides-track {
+  display:flex; width:max-content; height:100vh;
+  transition:transform 0.48s cubic-bezier(0.4,0,0.2,1);
+  will-change:transform;
+}
+.slide {
+  width:100vw; height:100vh; flex-shrink:0;
+  overflow-y:auto; overflow-x:hidden;
+  padding:60px 48px 48px;
+  display:flex; flex-direction:column; gap:0;
+}
+
+/* ══════════════════════════════════════════
+   SLIDE HEADER
+══════════════════════════════════════════ */
+.slide-eyebrow {
+  display:inline-flex; align-items:center; gap:8px;
+  border-radius:100px; padding:3px 14px;
+  font-size:0.65rem; letter-spacing:2px; text-transform:uppercase;
+  font-weight:700; margin-bottom:10px; width:fit-content;
+}
+.slide-eyebrow.amber { background:rgba(251,191,36,0.08); border:1px solid rgba(251,191,36,0.25); color:var(--amber); }
+.slide-eyebrow.cyan { background:rgba(34,211,238,0.08); border:1px solid rgba(34,211,238,0.25); color:var(--cyan); }
+.slide-eyebrow.violet { background:rgba(167,139,250,0.08); border:1px solid rgba(167,139,250,0.25); color:var(--violet); }
+.slide-eyebrow.green { background:rgba(74,222,128,0.08); border:1px solid rgba(74,222,128,0.25); color:var(--green); }
+.slide-eyebrow.red { background:rgba(248,113,113,0.08); border:1px solid rgba(248,113,113,0.25); color:var(--red); }
+.slide-eyebrow.blue { background:rgba(96,165,250,0.08); border:1px solid rgba(96,165,250,0.25); color:var(--blue); }
+.slide-eyebrow.pink { background:rgba(244,114,182,0.08); border:1px solid rgba(244,114,182,0.25); color:var(--pink); }
+.slide-eyebrow.orange { background:rgba(251,146,60,0.08); border:1px solid rgba(251,146,60,0.25); color:var(--orange); }
+
+.slide-title {
+  font-size:clamp(1.5rem,2.2vw,2.2rem); font-weight:800; letter-spacing:-1px;
+  line-height:1.15; margin-bottom:20px;
+}
+.slide-title .hl-amber { color:var(--amber); }
+.slide-title .hl-cyan { color:var(--cyan); }
+.slide-title .hl-violet { color:var(--violet); }
+.slide-title .hl-green { color:var(--green); }
+.slide-title .hl-red { color:var(--red); }
+.slide-title .hl-blue { color:var(--blue); }
+.slide-title .hl-pink { color:var(--pink); }
+.slide-title .hl-orange { color:var(--orange); }
+
+/* ══════════════════════════════════════════
+   GRIDS
+══════════════════════════════════════════ */
+.g2 { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+.g3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px; }
+.g4 { display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:14px; }
+.g-65 { display:grid; grid-template-columns:1.5fr 1fr; gap:16px; }
+.g-56 { display:grid; grid-template-columns:1fr 1.4fr; gap:16px; }
+
+/* ══════════════════════════════════════════
+   CARDS
+══════════════════════════════════════════ */
+.card {
+  background:var(--card); border:1px solid var(--border2);
+  border-radius:12px; padding:18px;
+}
+.card-amber { background:rgba(251,191,36,0.03); border-color:rgba(251,191,36,0.18); }
+.card-cyan { background:rgba(34,211,238,0.03); border-color:rgba(34,211,238,0.18); }
+.card-violet { background:rgba(167,139,250,0.03); border-color:rgba(167,139,250,0.18); }
+.card-green { background:rgba(74,222,128,0.03); border-color:rgba(74,222,128,0.18); }
+.card-blue { background:rgba(96,165,250,0.03); border-color:rgba(96,165,250,0.18); }
+.card-red { background:rgba(248,113,113,0.03); border-color:rgba(248,113,113,0.18); }
+.card-pink { background:rgba(244,114,182,0.03); border-color:rgba(244,114,182,0.18); }
+.card-orange { background:rgba(251,146,60,0.03); border-color:rgba(251,146,60,0.18); }
+
+.card-label {
+  font-size:0.58rem; letter-spacing:2px; text-transform:uppercase; font-weight:700;
+  color:var(--muted); margin-bottom:8px; display:flex; align-items:center; gap:6px;
+}
+.card-label.amber { color:var(--amber); }
+.card-label.cyan { color:var(--cyan); }
+.card-label.violet { color:var(--violet); }
+.card-label.green { color:var(--green); }
+.card-label.blue { color:var(--blue); }
+.card-label.red { color:var(--red); }
+.card-label.pink { color:var(--pink); }
+.card-label.orange { color:var(--orange); }
+
+.card p { font-size:0.83rem; color:var(--dim); line-height:1.65; }
+.card p strong { color:var(--text); }
+.card h3 { font-size:1rem; font-weight:700; margin-bottom:6px; }
+.card ul { list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:4px; }
+.card ul li { font-size:0.82rem; color:var(--dim); padding-left:14px; position:relative; }
+.card ul li::before { content:'→'; position:absolute; left:0; color:var(--muted); font-size:0.7rem; top:2px; }
+
+/* ══════════════════════════════════════════
+   MODULE CARD (numbered)
+══════════════════════════════════════════ */
+.mcard {
+  background:var(--card); border:1px solid var(--border2);
+  border-radius:12px; padding:16px; position:relative; overflow:hidden;
+}
+.mcard::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; }
+.mcard.amber::before { background:var(--amber); }
+.mcard.cyan::before { background:var(--cyan); }
+.mcard.violet::before { background:var(--violet); }
+.mcard.green::before { background:var(--green); }
+.mcard.red::before { background:var(--red); }
+.mcard.blue::before { background:var(--blue); }
+.mcard.pink::before { background:var(--pink); }
+.mcard.orange::before { background:var(--orange); }
+.mcard .num { font-family:'Fira Code',monospace; font-size:1.8rem; color:var(--border2); font-weight:700; position:absolute; right:10px; top:8px; line-height:1; }
+.mcard .mtag { font-size:0.58rem; letter-spacing:2px; text-transform:uppercase; font-weight:700; margin-bottom:4px; }
+.mcard.amber .mtag { color:var(--amber); }
+.mcard.cyan .mtag { color:var(--cyan); }
+.mcard.violet .mtag { color:var(--violet); }
+.mcard.green .mtag { color:var(--green); }
+.mcard.red .mtag { color:var(--red); }
+.mcard.blue .mtag { color:var(--blue); }
+.mcard.pink .mtag { color:var(--pink); }
+.mcard.orange .mtag { color:var(--orange); }
+.mcard h3 { font-family:'Fira Code',monospace; font-size:0.82rem; margin-bottom:6px; }
+.mcard.amber h3 { color:var(--amber); }
+.mcard.cyan h3 { color:var(--cyan); }
+.mcard.violet h3 { color:var(--violet); }
+.mcard.green h3 { color:var(--green); }
+.mcard.red h3 { color:var(--red); }
+.mcard.blue h3 { color:var(--blue); }
+.mcard.pink h3 { color:var(--pink); }
+.mcard.orange h3 { color:var(--orange); }
+.mcard p { font-size:0.78rem; color:var(--dim); line-height:1.55; }
+.mcard .badge {
+  display:inline-block; margin-top:8px; font-family:'Fira Code',monospace;
+  font-size:0.6rem; font-weight:700; padding:2px 7px; border-radius:3px;
+}
+.mcard.amber .badge { background:rgba(251,191,36,0.12); color:var(--amber); border:1px solid rgba(251,191,36,0.25); }
+.mcard.cyan .badge { background:rgba(34,211,238,0.12); color:var(--cyan); border:1px solid rgba(34,211,238,0.25); }
+.mcard.violet .badge { background:rgba(167,139,250,0.12); color:var(--violet); border:1px solid rgba(167,139,250,0.25); }
+.mcard.green .badge { background:rgba(74,222,128,0.12); color:var(--green); border:1px solid rgba(74,222,128,0.25); }
+.mcard.blue .badge { background:rgba(96,165,250,0.12); color:var(--blue); border:1px solid rgba(96,165,250,0.25); }
+.mcard.orange .badge { background:rgba(251,146,60,0.12); color:var(--orange); border:1px solid rgba(251,146,60,0.25); }
+.mcard.pink .badge { background:rgba(244,114,182,0.12); color:var(--pink); border:1px solid rgba(244,114,182,0.25); }
+.mcard.red .badge { background:rgba(248,113,113,0.12); color:var(--red); border:1px solid rgba(248,113,113,0.25); }
+
+/* ══════════════════════════════════════════
+   CODE BLOCKS
+══════════════════════════════════════════ */
+.code-wrap { margin:10px 0; }
+.code-label {
+  display:flex; align-items:center; justify-content:space-between;
+  background:#0a0b10; border:1px solid var(--border2); border-bottom:none;
+  border-radius:10px 10px 0 0; padding:7px 14px;
+}
+.code-filename { font-family:'Fira Code',monospace; font-size:0.68rem; color:var(--muted); display:flex; align-items:center; gap:6px; }
+.dot { width:9px; height:9px; border-radius:50%; }
+.copy-btn {
+  background:var(--border); border:1px solid var(--border2); border-radius:5px;
+  color:var(--muted); font-family:'Fira Code',monospace; font-size:0.62rem;
+  padding:3px 9px; cursor:pointer; transition:all 0.2s;
+}
+.copy-btn:hover { background:var(--border2); color:var(--text); }
+.copy-btn.copied { color:var(--green); border-color:rgba(74,222,128,0.4); }
+pre {
+  background:#0a0b10; border:1px solid var(--border2); border-top:none;
+  border-radius:0 0 10px 10px; padding:16px 18px; overflow-x:auto;
+  font-family:'Fira Code',monospace; font-size:0.78rem; line-height:1.7;
+  tab-size:2; max-height:280px;
+}
+code { font-family:'Fira Code',monospace; font-size:0.82em; background:rgba(251,191,36,0.1); color:var(--amber); padding:1px 5px; border-radius:3px; }
+
+/* Token colors (matching reference) */
+.tok-k { color:#c792ea; }
+.tok-s { color:#c3e88d; }
+.tok-c { color:#546e7a; font-style:italic; }
+.tok-p { color:#89ddff; }
+.tok-v { color:#82aaff; }
+.tok-r { color:#f78c6c; }
+.tok-fn { color:#82aaff; }
+.tok-n { color:#ffcb6b; }
+.tok-o { color:#89ddff; }
+.tok-x { color:#f07178; }
+.tok-a { color:#c3e88d; }
+.tok-t { color:#c792ea; }
+
+/* ══════════════════════════════════════════
+   CALLOUTS
+══════════════════════════════════════════ */
+.callout {
+  display:flex; gap:12px; padding:13px 16px; border-radius:10px;
+  margin:10px 0; font-size:0.83rem; line-height:1.6;
+}
+.callout-icon { font-size:1rem; flex-shrink:0; margin-top:2px; }
+.callout p { color:var(--dim); }
+.callout p strong { color:var(--text); }
+.callout code { font-size:0.78em; }
+.callout.info { background:rgba(96,165,250,0.06); border:1px solid rgba(96,165,250,0.2); }
+.callout.warn { background:rgba(251,191,36,0.06); border:1px solid rgba(251,191,36,0.2); }
+.callout.success { background:rgba(74,222,128,0.06); border:1px solid rgba(74,222,128,0.2); }
+.callout.danger { background:rgba(248,113,113,0.06); border:1px solid rgba(248,113,113,0.2); }
+.callout.tip { background:rgba(167,139,250,0.06); border:1px solid rgba(167,139,250,0.2); }
+
+/* ══════════════════════════════════════════
+   TABLES
+══════════════════════════════════════════ */
+.tbl-wrap { background:var(--card); border:1px solid var(--border2); border-radius:12px; overflow:hidden; margin:10px 0; }
+.tbl-wrap table { width:100%; border-collapse:collapse; }
+.tbl-wrap th { padding:9px 14px; background:#0a0b10; font-size:0.6rem; letter-spacing:2px; text-transform:uppercase; color:var(--muted); text-align:left; border-bottom:1px solid var(--border); white-space:nowrap; }
+.tbl-wrap td { padding:9px 14px; font-size:0.8rem; border-bottom:1px solid var(--border); vertical-align:middle; color:var(--dim); }
+.tbl-wrap tr:last-child td { border-bottom:none; }
+.tbl-wrap tr:hover td { background:rgba(255,255,255,0.015); }
+.tbl-wrap td.mono { font-family:'Fira Code',monospace; font-size:0.72rem; color:var(--amber); }
+.tbl-wrap td.cyan { color:var(--cyan); }
+.tbl-wrap td.green { color:var(--green); font-family:'Fira Code',monospace; font-size:0.72rem; }
+.tbl-wrap td.red { color:var(--red); }
+.tbl-wrap td.hi { color:var(--text); font-weight:600; }
+
+/* ══════════════════════════════════════════
+   BEFORE/AFTER DIFF
+══════════════════════════════════════════ */
+.diff-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:10px 0; }
+.diff-panel { border-radius:10px; overflow:hidden; }
+.diff-header { padding:7px 14px; font-size:0.62rem; letter-spacing:1.5px; text-transform:uppercase; font-weight:700; font-family:'Fira Code',monospace; }
+.diff-panel.before .diff-header { background:rgba(248,113,113,0.12); color:var(--red); border:1px solid rgba(248,113,113,0.25); border-bottom:none; }
+.diff-panel.after .diff-header { background:rgba(74,222,128,0.1); color:var(--green); border:1px solid rgba(74,222,128,0.2); border-bottom:none; }
+.diff-panel.before pre { border-color:rgba(248,113,113,0.2); border-radius:0 0 10px 10px; }
+.diff-panel.after pre { border-color:rgba(74,222,128,0.15); border-radius:0 0 10px 10px; }
+
+/* ══════════════════════════════════════════
+   ARCHITECTURE / FLOW DIAGRAMS
+══════════════════════════════════════════ */
+.arch-box {
+  background:var(--card); border:1px solid var(--border2); border-radius:10px;
+  padding:12px 16px; display:flex; flex-direction:column; gap:3px;
+}
+.arch-box .abt { font-size:0.58rem; letter-spacing:2px; text-transform:uppercase; color:var(--muted); }
+.arch-box .abn { font-family:'Fira Code',monospace; font-size:0.82rem; font-weight:600; }
+.arch-box .abd { font-size:0.74rem; color:var(--dim); }
+
+.flow-row { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.flow-arr { color:var(--muted); font-size:1.1rem; flex-shrink:0; }
+.flow-arr-v { color:var(--muted); font-size:1rem; text-align:center; padding:2px 0; }
+
+/* Big arch diagram */
+.arch-diagram {
+  background:var(--card); border:1px solid var(--border2); border-radius:14px;
+  padding:20px; position:relative; overflow:hidden;
+}
+.arch-diagram::before {
+  content:''; position:absolute; top:-60px; right:-60px;
+  width:300px; height:300px;
+  background:radial-gradient(circle,rgba(251,191,36,0.04) 0%,transparent 70%);
+  pointer-events:none;
+}
+.arch-layer {
+  border:1px solid var(--border2); border-radius:10px; padding:10px 14px;
+  display:flex; align-items:center; gap:10px; margin-bottom:6px; position:relative;
+}
+.arch-layer:last-child { margin-bottom:0; }
+.arch-layer .al-icon { font-size:1.1rem; flex-shrink:0; }
+.arch-layer .al-title { font-weight:700; font-size:0.82rem; }
+.arch-layer .al-sub { font-size:0.74rem; color:var(--dim); }
+.arch-layer .al-code { font-family:'Fira Code',monospace; font-size:0.7rem; color:var(--muted); }
+.al-arrow { text-align:center; color:var(--muted); font-size:1rem; padding:2px 0 2px 22px; }
+
+.arch-layer.browser { background:rgba(34,211,238,0.05); border-color:rgba(34,211,238,0.25); }
+.arch-layer.jira { background:rgba(251,191,36,0.05); border-color:rgba(251,191,36,0.25); }
+.arch-layer.velocity { background:rgba(167,139,250,0.05); border-color:rgba(167,139,250,0.25); }
+.arch-layer.java { background:rgba(251,146,60,0.05); border-color:rgba(251,146,60,0.25); }
+.arch-layer.react { background:rgba(74,222,128,0.05); border-color:rgba(74,222,128,0.25); }
+.arch-layer.build { background:rgba(96,165,250,0.05); border-color:rgba(96,165,250,0.25); }
+
+/* ══════════════════════════════════════════
+   URL ROWS
+══════════════════════════════════════════ */
+.url-list { display:flex; flex-direction:column; gap:6px; margin:10px 0; }
+.url-row {
+  display:flex; align-items:flex-start; gap:12px;
+  background:var(--card); border:1px solid var(--border2); border-radius:8px; padding:10px 14px;
+}
+.url-row.hl { border-color:rgba(251,191,36,0.35); background:rgba(251,191,36,0.03); }
+.url-type { font-size:0.68rem; color:var(--muted); min-width:140px; flex-shrink:0; padding-top:2px; white-space:nowrap; }
+.url-val { font-family:'Fira Code',monospace; font-size:0.74rem; color:var(--cyan); word-break:break-all; }
+.url-row.hl .url-val { color:var(--amber); }
+
+/* ══════════════════════════════════════════
+   STEP NUMBERED LIST
+══════════════════════════════════════════ */
+.steps-list { display:flex; flex-direction:column; gap:8px; margin:10px 0; }
+.step-item {
+  display:flex; gap:12px; align-items:flex-start;
+  background:var(--card); border:1px solid var(--border2); border-radius:10px; padding:12px 14px;
+}
+.step-num-badge {
+  width:28px; height:28px; border-radius:7px; display:flex; align-items:center; justify-content:center;
+  font-weight:800; font-size:0.75rem; font-family:'Fira Code',monospace; flex-shrink:0;
+}
+.step-item .si-content h4 { font-size:0.85rem; font-weight:700; margin-bottom:3px; }
+.step-item .si-content p { font-size:0.8rem; color:var(--dim); }
+
+/* ══════════════════════════════════════════
+   SECTION DIVIDER
+══════════════════════════════════════════ */
+.divider { display:flex; align-items:center; gap:14px; margin:14px 0 12px; }
+.divider-line { flex:1; height:1px; background:var(--border); }
+.divider-text { font-size:0.6rem; letter-spacing:3px; text-transform:uppercase; color:var(--muted); white-space:nowrap; }
+
+/* ══════════════════════════════════════════
+   HERO SLIDE
+══════════════════════════════════════════ */
+.hero-slide {
+  justify-content:center; align-items:flex-start;
+  background:radial-gradient(ellipse 80% 60% at 60% 40%,rgba(251,191,36,0.05) 0%,transparent 60%),var(--bg);
+}
+.hero-badge {
+  display:inline-flex; align-items:center; gap:8px;
+  background:rgba(251,191,36,0.08); border:1px solid rgba(251,191,36,0.3);
+  border-radius:100px; padding:4px 14px; font-size:0.68rem; color:var(--amber);
+  letter-spacing:2px; text-transform:uppercase; font-weight:700; margin-bottom:16px;
+}
+.hero-badge .pulse { width:6px; height:6px; background:var(--amber); border-radius:50%; animation:pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+.hero-title { font-size:clamp(2.6rem,4vw,4.2rem); font-weight:800; letter-spacing:-2px; line-height:1.1; margin-bottom:14px; }
+.hero-sub { color:var(--dim); font-size:1rem; max-width:680px; margin-bottom:24px; line-height:1.6; }
+.hero-pills { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:28px; }
+.pill {
+  display:flex; align-items:center; gap:8px; background:var(--card);
+  border:1px solid var(--border2); border-radius:8px; padding:8px 14px;
+  font-family:'Fira Code',monospace; font-size:0.76rem;
+}
+.pill-dot { width:7px; height:7px; border-radius:50%; flex-shrink:0; }
+.hero-meta { display:flex; gap:12px; flex-wrap:wrap; }
+.meta-card {
+  padding:10px 18px; background:rgba(255,255,255,0.025); border:1px solid var(--border2);
+  border-radius:8px; display:flex; flex-direction:column; gap:2px;
+}
+.meta-card .ml { font-size:0.58rem; color:var(--muted); letter-spacing:2px; text-transform:uppercase; }
+.meta-card .mv { font-family:'Fira Code',monospace; font-size:0.8rem; color:var(--green); }
+
+/* ══════════════════════════════════════════
+   PROGRESS BAR
+══════════════════════════════════════════ */
+.progress { position:fixed; bottom:0; left:0; height:2px; background:var(--amber); transition:width 0.4s ease; z-index:300; }
+
+/* ══════════════════════════════════════════
+   KBD HINT
+══════════════════════════════════════════ */
+.kbd-hint { position:fixed; bottom:10px; right:16px; font-family:'Fira Code',monospace; font-size:0.58rem; color:var(--muted); opacity:0.45; display:flex; gap:6px; align-items:center; }
+.kbd { background:var(--card); border:1px solid var(--border2); padding:2px 5px; border-radius:3px; }
+
+/* ══════════════════════════════════════════
+   ANIMATIONS
+══════════════════════════════════════════ */
+@keyframes fadeUp { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
+.slide.active > * { animation:fadeUp 0.45s ease both; }
+</style>
+</head>
+<body>
+
+<!-- TOP NAV -->
+<nav class="topnav">
+  <div class="nav-logo">🏗️ Jira DC Plugin Guide</div>
+  <div class="nav-tabs" id="navTabs"></div>
+  <div class="nav-right">
+    <span class="slide-counter" id="counter">1 / 16</span>
+    <button class="nav-arrow" id="btnPrev" onclick="go(cur-1)">← prev</button>
+    <button class="nav-arrow" id="btnNext" onclick="go(cur+1)">next →</button>
+  </div>
+</nav>
+
+<div class="slides-track" id="track">
+
+<!-- ════════════════════════════════════════════
+  SLIDE 0 · HERO
+════════════════════════════════════════════ -->
+<div class="slide hero-slide active" data-label="Overview">
+  <div>
+    <div class="hero-badge"><span class="pulse"></span> Complete Developer Reference</div>
+    <h1 class="hero-title">Jira <span style="color:var(--amber)">Data Center</span><br>Plugin <span style="color:var(--cyan)">Guide</span></h1>
+    <p class="hero-sub">React 16 frontend · Java 8 backend · webpack 5 · Atlassian SDK — everything to build, wire, and deploy a full Jira plugin from scratch, including architecture, file-by-file breakdown, WRM integration, and every error fixed.</p>
+    <div class="hero-pills">
+      <div class="pill"><div class="pill-dot" style="background:var(--red)"></div>React 16</div>
+      <div class="pill"><div class="pill-dot" style="background:var(--cyan)"></div>TypeScript</div>
+      <div class="pill"><div class="pill-dot" style="background:var(--green)"></div>webpack 5</div>
+      <div class="pill"><div class="pill-dot" style="background:var(--orange)"></div>Java 8 / OSGi</div>
+      <div class="pill"><div class="pill-dot" style="background:var(--violet)"></div>Velocity Templates</div>
+      <div class="pill"><div class="pill-dot" style="background:var(--amber)"></div>WRM</div>
+      <div class="pill"><div class="pill-dot" style="background:var(--blue)"></div>AMPS 9.1.1</div>
+      <div class="pill"><div class="pill-dot" style="background:var(--pink)"></div>atlassian-plugin.xml</div>
+    </div>
+    <div class="hero-meta">
+      <div class="meta-card"><span class="ml">Plugin ID</span><span class="mv">myExportPlugin</span></div>
+      <div class="meta-card"><span class="ml">groupId</span><span class="mv">com.atlassian.aservo</span></div>
+      <div class="meta-card"><span class="ml">Jira</span><span class="mv">9.12.2</span></div>
+      <div class="meta-card"><span class="ml">Node.js</span><span class="mv">v22.18.0</span></div>
+      <div class="meta-card"><span class="ml">AMPS</span><span class="mv">9.1.1</span></div>
+      <div class="meta-card"><span class="ml">Java</span><span class="mv">8 (Temurin)</span></div>
+      <div class="meta-card"><span class="ml">Date</span><span class="mv">March 2026</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+  SLIDE 1 · HIGH-LEVEL ARCHITECTURE DIAGRAM
+════════════════════════════════════════════ -->
+<div class="slide" data-label="Architecture">
+  <div class="slide-eyebrow cyan">Section 1 · Architecture</div>
+  <h2 class="slide-title">High-Level <span class="hl-cyan">Architecture</span> Diagram</h2>
+
+  <div class="g-65" style="gap:18px">
+    <div class="arch-diagram">
+      <div style="font-size:0.58rem;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:12px">Full Request → Response Flow</div>
+
+      <div class="arch-layer browser">
+        <span class="al-icon">🌐</span>
+        <div style="flex:1">
+          <div class="al-title" style="color:var(--cyan)">BROWSER</div>
+          <div class="al-sub">User navigates to: <code>/jira/plugins/servlet/exportServlet</code></div>
+        </div>
+        <div class="al-code">Atlassian Servlet URL</div>
+      </div>
+      <div class="al-arrow">↓ HTTP GET request</div>
+
+      <div class="arch-layer jira">
+        <span class="al-icon">🎨</span>
+        <div style="flex:1">
+          <div class="al-title" style="color:var(--amber)">JIRA DECORATOR (atl.admin)</div>
+          <div class="al-sub">Wraps page in Jira chrome: top nav, admin sidebar, footer. Set via <code>&lt;meta name='decorator' content='atl.admin'/&gt;</code></div>
+        </div>
+      </div>
+      <div class="al-arrow">↓ delegates to servlet</div>
+
+      <div class="arch-layer java">
+        <span class="al-icon">☕</span>
+        <div style="flex:1">
+          <div class="al-title" style="color:var(--orange)">JAVA BACKEND — MyPluginServlet</div>
+          <div class="al-sub"><code>url-pattern: /exportServlet</code> · <code>doGet()</code> sets contextPath, calls <code>templateRenderer.render('templates/app.vm')</code></div>
+        </div>
+      </div>
+      <div class="al-arrow">↓ renders Velocity template</div>
+
+      <div class="arch-layer velocity">
+        <span class="al-icon">📜</span>
+        <div style="flex:1">
+          <div class="al-title" style="color:var(--violet)">VELOCITY TEMPLATE — app.vm</div>
+          <div class="al-sub"><code>$webResourceManager.requireResourcesForContext('app')</code> → WRM injects <code>&lt;script&gt;</code> for bundled.app.js + <code>&lt;link&gt;</code> for app.css</div>
+        </div>
+      </div>
+      <div class="al-arrow">↓ HTML response sent to browser</div>
+
+      <div class="arch-layer react">
+        <span class="al-icon">⚛️</span>
+        <div style="flex:1">
+          <div class="al-title" style="color:var(--green)">REACT 16 FRONTEND — App.tsx</div>
+          <div class="al-sub"><code>window.addEventListener('load')</code> → <code>ReactDOM.render(&lt;App&gt;)</code> mounts on <code>&lt;div id='container'&gt;</code></div>
+        </div>
+      </div>
+      <div class="al-arrow">↑ builds from</div>
+
+      <div class="arch-layer build">
+        <span class="al-icon">📦</span>
+        <div style="flex:1">
+          <div class="al-title" style="color:var(--blue)">FRONTEND BUILD — webpack 5 + WrmPlugin</div>
+          <div class="al-sub">React 16 + TypeScript → <code>js/bundled.app.js</code> + <code>css/app.css</code> + <code>images/</code> → WrmPlugin writes <code>wr-defs.xml</code> → Jira scans at startup</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div class="card card-cyan">
+        <div class="card-label cyan">🔗 Key URL Patterns</div>
+        <div class="url-list" style="margin:0">
+          <div class="url-row" style="background:transparent;border-color:var(--border);padding:7px 10px">
+            <span class="url-type">Servlet</span>
+            <span class="url-val" style="font-size:0.7rem">/jira/plugins/servlet/{url-pattern}</span>
+          </div>
+          <div class="url-row" style="background:transparent;border-color:var(--border);padding:7px 10px">
+            <span class="url-type">WRM resource</span>
+            <span class="url-val" style="font-size:0.68rem">/jira/download/resources/{groupId}.{artifactId}:{key}/{file}</span>
+          </div>
+          <div class="url-row" style="background:rgba(251,191,36,0.04);border-color:rgba(251,191,36,0.3);padding:7px 10px">
+            <span class="url-type" style="color:var(--amber)">This plugin</span>
+            <span class="url-val" style="color:var(--amber);font-size:0.68rem">/jira/plugins/servlet/exportServlet</span>
+          </div>
+          <div class="url-row" style="background:rgba(251,191,36,0.04);border-color:rgba(251,191,36,0.3);padding:7px 10px">
+            <span class="url-type" style="color:var(--amber)">JS bundle</span>
+            <span class="url-val" style="color:var(--amber);font-size:0.66rem">/jira/download/resources/com.atlassian.aservo.myPlugin:entrypoint-app/js/bundled.app.js</span>
+          </div>
+        </div>
+      </div>
+      <div class="callout warn">
+        <div class="callout-icon">📌</div>
+        <p><strong>Servlet url-pattern rule:</strong> In <code>atlassian-plugin.xml</code> set <code>&lt;url-pattern&gt;/exportServlet&lt;/url-pattern&gt;</code>. Jira auto-prepends <code>/plugins/servlet</code> — do NOT include it in url-pattern. Your web-item <code>&lt;link&gt;</code> must use the full path: <code>/plugins/servlet/exportServlet</code>.</p>
+      </div>
+      <div class="callout info">
+        <div class="callout-icon">💡</div>
+        <p><strong>Three layers of context propagation:</strong> Java servlet sets contextPath via <code>req.getContextPath()</code> → passes to Velocity as <code>$!{contextPath}</code> → React reads it via <code>window.AJS.contextPath()</code> (preferred — always correct). Result: <code>/jira</code></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+  SLIDE 2 · ENVIRONMENT SETUP
+════════════════════════════════════════════ -->
+<div class="slide" data-label="Setup">
+  <div class="slide-eyebrow amber">Section 2 · Environment Setup</div>
+  <h2 class="slide-title">Installing All <span class="hl-amber">Required Tools</span> — Windows</h2>
+
+  <div class="g2" style="gap:16px">
+    <div>
+      <div class="g2" style="gap:10px;margin-bottom:12px">
+        <div class="mcard amber"><div class="num">01</div><div class="mtag">Java</div><h3>JDK 8 (Temurin)</h3><p>Required by Jira 9.x. Java 11 or 17 will NOT work. Run .msi — sets JAVA_HOME + PATH automatically.</p><span class="badge">adoptium.net</span></div>
+        <div class="mcard violet"><div class="num">02</div><div class="mtag">Build</div><h3>Apache Maven 3.6/3.8</h3><p>Bundled inside Atlassian SDK installer — no separate install needed.</p><span class="badge">via SDK</span></div>
+        <div class="mcard cyan"><div class="num">03</div><div class="mtag">Atlassian SDK</div><h3>AMPS 9.1.1</h3><p>Provides all <code>atlas-*</code> commands: atlas-run, atlas-package, atlas-create-jira-plugin.</p><span class="badge">developer.atlassian.com</span></div>
+        <div class="mcard green"><div class="num">04</div><div class="mtag">Node.js</div><h3>v22.18.0 (LTS)</h3><p>Powers webpack + npm — build-time only, never bundled into the Jira .jar.</p><span class="badge">nodejs.org</span></div>
+      </div>
+      <div class="callout warn">
+        <div class="callout-icon">⚠️</div>
+        <p><strong>Java version must match pom.xml!</strong> Installed JDK and <code>&lt;maven.compiler.source&gt;1.8&lt;/maven.compiler.source&gt;</code> must agree. Mismatch → <code>atlas-run</code> fails with Maven compiler error.</p>
+      </div>
+      <div class="callout tip">
+        <div class="callout-icon">💡</div>
+        <p>Use <strong>nvm-windows</strong> (<code>github.com/coreybutler/nvm-windows</code>) to switch between Node versions. Any Node.js LTS ≥ 16 works with webpack 5 and the Atlassian WRM plugin.</p>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div class="code-wrap">
+        <div class="code-label"><div class="code-filename"><div class="dot" style="background:#ff5f57"></div><div class="dot" style="background:#febc2e"></div><div class="dot" style="background:#28c840"></div>&nbsp;Verify all tools</div><button class="copy-btn" onclick="copyCode(this)">⧉ Copy</button></div>
+        <pre><span class="tok-c"># Java 8</span>
+<span class="tok-fn">java</span> -version
+<span class="tok-c"># openjdk version "1.8.0_xxx" (Temurin-8)</span>
+
+<span class="tok-c"># Atlassian SDK</span>
+<span class="tok-fn">atlas-version</span>
+<span class="tok-c"># AMPS Version: 9.1.1</span>
+
+<span class="tok-c"># Node.js + npm</span>
+<span class="tok-fn">node</span> -v   <span class="tok-c"># v22.18.0</span>
+<span class="tok-fn">npm</span>  -v   <span class="tok-c"># 10.x.x</span></pre>
+      </div>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Command</th><th>What it does</th></tr></thead>
+          <tbody>
+            <tr><td class="mono">npm install</td><td>Install all packages from package.json</td></tr>
+            <tr><td class="mono">npm install --legacy-peer-deps</td><td>Install ignoring peer dep conflicts</td></tr>
+            <tr><td class="mono">npm run build</td><td>Run webpack → output to backend/resources/frontend/</td></tr>
+            <tr><td class="mono">npm ci</td><td>Clean install from lock file exactly</td></tr>
+            <tr><td class="mono">atlas-run</td><td>Start Jira at localhost:2990/jira with plugin loaded</td></tr>
+            <tr><td class="mono">atlas-package</td><td>Package plugin as .jar file</td></tr>
+            <tr><td class="mono">atlas-package -DskipTests</td><td>Package .jar skipping unit tests</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+  SLIDE 3 · PLUGIN SKELETON + REACT SETUP
+════════════════════════════════════════════ -->
+<div class="slide" data-label="Create Plugin">
+  <div class="slide-eyebrow green">Section 2.5 – 2.6 · Plugin Creation</div>
+  <h2 class="slide-title">Create Skeleton &amp; <span class="hl-green">React 16 Setup</span></h2>
+
+  <div class="g2" style="gap:16px">
+    <div>
+      <div class="code-wrap">
+        <div class="code-label"><div class="code-filename"><div class="dot" style="background:#ff5f57"></div><div class="dot" style="background:#febc2e"></div><div class="dot" style="background:#28c840"></div>&nbsp;Step 1 — Create plugin skeleton</div><button class="copy-btn" onclick="copyCode(this)">⧉ Copy</button></div>
+        <pre><span class="tok-fn">cd</span> C:\Users\Pranesh\Documents\projects
+<span class="tok-fn">atlas-create-jira-plugin</span>
+
+<span class="tok-c"># Prompt answers for this plugin:</span>
+<span class="tok-p">groupId</span>:    com.atlassian.aservo
+<span class="tok-p">artifactId</span>: myPlugin
+<span class="tok-p">version</span>:    1.0.0-SNAPSHOT
+<span class="tok-p">package</span>:    com.atlassian.aservo.myPlugin
+<span class="tok-p">OSGi Java Config</span>: N
+<span class="tok-p">Confirm (Y)</span>: Y</pre>
+      </div>
+      <div class="code-wrap">
+        <div class="code-label"><div class="code-filename">Step 2 — Frontend dependencies (frontend/my-app/)</div><button class="copy-btn" onclick="copyCode(this)">⧉ Copy</button></div>
+        <pre><span class="tok-fn">npx</span> create-react-app my-app <span class="tok-v">--template typescript</span>
+<span class="tok-fn">cd</span> my-app
+
+<span class="tok-c"># Webpack + Atlassian WRM plugin</span>
+<span class="tok-fn">npm</span> install --save-dev atlassian-webresource-webpack-plugin
+<span class="tok-fn">npm</span> install --save-dev webpack webpack-cli ts-loader typescript
+<span class="tok-fn">npm</span> install --save-dev mini-css-extract-plugin css-loader
+
+<span class="tok-c"># Downgrade React to 16 (REQUIRED for Jira DC)</span>
+<span class="tok-fn">npm</span> install react@^16.14.0 react-dom@^16.14.0
+
+<span class="tok-c"># Pin @types EXACT — ^ resolves to v19+ which removes ReactDOM.render()</span>
+<span class="tok-fn">npm</span> install --save-dev @types/react@16.9.0 @types/react-dom@16.9.0 --legacy-peer-deps
+
+<span class="tok-c"># Fix testing-library conflict (v16 requires React 18)</span>
+<span class="tok-fn">npm</span> install @testing-library/react@12 --save-dev --legacy-peer-deps</pre>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div class="callout danger">
+        <div class="callout-icon">🚫</div>
+        <p><strong>Must use React 16 for Jira Data Center!</strong><br>React 18 uses <code>ReactDOM.createRoot()</code> which conflicts with Jira's DOM lifecycle. Always install <code>react@^16.14.0</code> and <code>react-dom@^16.14.0</code>.</p>
+      </div>
+      <div class="callout danger">
+        <div class="callout-icon">🚫</div>
+        <p><strong>Pin @types versions exactly — NO ^ or ~ prefix!</strong><br><code>@types/react@^16</code> resolves to v19+ (types have independent versioning). React 18+ types removed <code>ReactDOM.render()</code> → TypeScript error on React 16.</p>
+      </div>
+      <div class="callout warn">
+        <div class="callout-icon">⚠️</div>
+        <p><strong>ERESOLVE peer conflict:</strong> <code>@testing-library/react@16</code> requires react@^18. Fix: install v12, the last version compatible with React 16, using <code>--legacy-peer-deps</code>.</p>
+      </div>
+      <div class="card card-amber" style="margin-top:2px">
+        <div class="card-label amber">📦 Key Dependencies Summary</div>
+        <ul>
+          <li><code>react@^16.14.0</code> — Core React (must be 16)</li>
+          <li><code>react-dom@^16.14.0</code> — DOM mounting (DEFAULT import, not * as)</li>
+          <li><code>@types/react@16.9.0</code> — TypeScript types — EXACT pin</li>
+          <li><code>@types/react-dom@16.9.0</code> — TypeScript types — EXACT pin</li>
+          <li><code>atlassian-webresource-webpack-plugin</code> — generates wr-defs.xml</li>
+          <li><code>webpack + webpack-cli + ts-loader + typescript</code> — build toolchain</li>
+          <li><code>mini-css-extract-plugin + css-loader</code> — CSS extraction</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+  SLIDE 4 · WEBPACK CONFIG
+════════════════════════════════════════════ -->
+<div class="slide" data-label="webpack.config.js">
+  <div class="slide-eyebrow violet">Section 3.1.1 · Frontend Files</div>
+  <h2 class="slide-title"><span class="hl-violet">webpack.config.js</span> — Full Annotated</h2>
+
+  <div class="g-65" style="gap:16px">
+    <div class="code-wrap">
+      <div class="code-label"><div class="code-filename"><div class="dot" style="background:#ff5f57"></div><div class="dot" style="background:#febc2e"></div><div class="dot" style="background:#28c840"></div>&nbsp;frontend/my-app/webpack.config.js</div><button class="copy-btn" onclick="copyCode(this)">⧉ Copy</button></div>
+      <pre><span class="tok-k">const</span> WrmPlugin  = <span class="tok-fn">require</span>(<span class="tok-s">'atlassian-webresource-webpack-plugin'</span>);
+<span class="tok-k">const</span> MiniCssExtractPlugin = <span class="tok-fn">require</span>(<span class="tok-s">'mini-css-extract-plugin'</span>);
+<span class="tok-k">const</span> path = <span class="tok-fn">require</span>(<span class="tok-s">'path'</span>);
+
+<span class="tok-fn">module</span>.<span class="tok-p">exports</span> = {
+
+  <span class="tok-c">// ENTRY — root file webpack starts bundling from</span>
+  <span class="tok-c">// key 'app' is used in contextMap and becomes the bundle filename</span>
+  <span class="tok-p">entry</span>: { <span class="tok-v">app</span>: <span class="tok-s">'./src/App.tsx'</span> },
+
+  <span class="tok-c">// OUTPUT — where built files land on disk</span>
+  <span class="tok-c">// path: backend Maven resources folder — gets packaged into .jar</span>
+  <span class="tok-p">output</span>: {
+    <span class="tok-p">path</span>: path.<span class="tok-fn">resolve</span>(__dirname, <span class="tok-s">'../backend/src/main/resources/frontend'</span>),
+    <span class="tok-p">filename</span>: <span class="tok-s">'js/bundled.[name].js'</span>,
+    <span class="tok-c">// publicPath: '' = relative paths; WRM resolves them at runtime</span>
+    <span class="tok-c">// publicPath: '/' would write absolute paths → 404 (wrong for WRM)</span>
+    <span class="tok-p">publicPath</span>: <span class="tok-s">''</span>,
+  },
+
+  <span class="tok-p">watch</span>: <span class="tok-k">true</span>, <span class="tok-c">// auto-rebuild on file changes (for atlas-run dev loop)</span>
+  <span class="tok-p">resolve</span>: { <span class="tok-p">extensions</span>: [<span class="tok-s">'.tsx'</span>, <span class="tok-s">'.ts'</span>, <span class="tok-s">'.js'</span>] },
+
+  <span class="tok-p">module</span>: {
+    <span class="tok-p">rules</span>: [
+      { <span class="tok-p">test</span>: <span class="tok-r">/\.tsx?$/</span>, <span class="tok-p">exclude</span>: <span class="tok-r">/node_modules/</span>, <span class="tok-p">use</span>: <span class="tok-s">'ts-loader'</span> },
+      { <span class="tok-p">test</span>: <span class="tok-r">/\.css$/</span>,  <span class="tok-p">use</span>: [MiniCssExtractPlugin.<span class="tok-p">loader</span>, <span class="tok-s">'css-loader'</span>] },
+      { <span class="tok-p">test</span>: <span class="tok-r">/\.(svg|png|jpg|jpeg|gif|ico)$/</span>,
+        <span class="tok-p">type</span>: <span class="tok-s">'asset/resource'</span>,
+        <span class="tok-p">generator</span>: { <span class="tok-p">filename</span>: <span class="tok-s">'images/[name][ext]'</span> } },
+    ],
+  },
+
+  <span class="tok-p">plugins</span>: [
+    <span class="tok-k">new</span> <span class="tok-fn">MiniCssExtractPlugin</span>({ <span class="tok-p">filename</span>: <span class="tok-s">'css/[name].css'</span>, <span class="tok-p">runtime</span>: <span class="tok-k">false</span> }),
+    <span class="tok-k">new</span> <span class="tok-fn">WrmPlugin</span>({
+      <span class="tok-p">pluginKey</span>: <span class="tok-s">'com.atlassian.aservo.myPlugin'</span>,
+      <span class="tok-c">// entry 'app' tagged with Jira context 'app'</span>
+      <span class="tok-p">contextMap</span>: { <span class="tok-v">app</span>: [<span class="tok-s">'app'</span>] },
+      <span class="tok-p">watch</span>: <span class="tok-k">true</span>,
+      <span class="tok-c">// Must be inside META-INF/plugin-descriptors/ for OSGi scanner</span>
+      <span class="tok-p">xmlDescriptors</span>: path.<span class="tok-fn">resolve</span>(__dirname,
+        <span class="tok-s">'../backend/src/main/resources/META-INF/plugin-descriptors/wr-defs.xml'</span>),
+    }),
+  ],
+};</pre>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Loader</th><th>File types</th><th>Output</th></tr></thead>
+          <tbody>
+            <tr><td class="mono">ts-loader</td><td>.tsx, .ts</td><td class="green">→ JavaScript</td></tr>
+            <tr><td class="mono">css-loader + MiniCss</td><td>.css</td><td class="green">→ css/app.css</td></tr>
+            <tr><td class="mono">asset/resource</td><td>.svg .png .jpg .gif .ico</td><td class="green">→ images/[name][ext]</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="callout danger">
+        <div class="callout-icon">🚫</div>
+        <p><strong>publicPath must be <code>''</code> (empty string)!</strong><br><code>'/'</code> writes <code>src='/images/logo.png'</code> → absolute path from web root → 404. WRM serves images at <code>/jira/download/resources/{key}/images/</code> — these paths never match.<br><code>''</code> writes relative paths — WRM resolves them correctly at runtime.</p>
+      </div>
+      <div class="callout info">
+        <div class="callout-icon">💡</div>
+        <p><strong>Best practice for images:</strong> Don't import images via webpack at all. Build the full WRM URL manually in React using <code>AJS.contextPath()</code> + PLUGIN_KEY + filename. See Slide 7 for the pattern.</p>
+      </div>
+      <div class="callout warn">
+        <div class="callout-icon">⚠️</div>
+        <p><strong>watch: true</strong> auto-rebuilds on file changes. Perfect for the <code>atlas-run</code> dev loop — Jira detects new files and hot-reloads automatically.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+  SLIDE 5 · TSCONFIG + PACKAGE.JSON
+════════════════════════════════════════════ -->
+<div class="slide" data-label="tsconfig + pkg">
+  <div class="slide-eyebrow cyan">Section 3.1.2 – 3.1.3 · Frontend Files</div>
+  <h2 class="slide-title"><span class="hl-cyan">tsconfig.json</span> &amp; package.json</h2>
+
+  <div class="g2" style="gap:16px">
+    <div>
+      <div class="code-wrap">
+        <div class="code-label"><div class="code-filename">tsconfig.json</div><button class="copy-btn" onclick="copyCode(this)">⧉ Copy</button></div>
+        <pre>{
+  <span class="tok-x">"compilerOptions"</span>: {
+    <span class="tok-x">"target"</span>: <span class="tok-s">"es5"</span>,        <span class="tok-c">// compile to ES5 for broad browser support</span>
+    <span class="tok-x">"jsx"</span>: <span class="tok-s">"react"</span>,       <span class="tok-c">// React 16 — NOT "react-jsx" (React 17+!)</span>
+    <span class="tok-x">"esModuleInterop"</span>: <span class="tok-k">true</span>,  <span class="tok-c">// allows: import ReactDOM from "react-dom"</span>
+    <span class="tok-x">"allowSyntheticDefaultImports"</span>: <span class="tok-k">true</span>,
+    <span class="tok-x">"strict"</span>: <span class="tok-k">true</span>,
+    <span class="tok-x">"noEmit"</span>: <span class="tok-k">true</span>,       <span class="tok-c">// ts-loader emits, not tsc directly</span>
+    <span class="tok-x">"moduleResolution"</span>: <span class="tok-s">"node"</span>,
+    <span class="tok-x">"module"</span>: <span class="tok-s">"esnext"</span>
+  }
+}</pre>
+      </div>
+      <div class="callout danger">
+        <div class="callout-icon">🚫</div>
+        <p><strong>Use <code>"jsx": "react"</code> — NOT <code>"react-jsx"</code></strong><br><code>"react-jsx"</code> is the React 17+ automatic JSX transform. React 16 does not support it → build fails or <code>'React is not defined'</code>. With <code>"react"</code> you MUST write <code>import React from 'react'</code> in every .tsx file.</p>
+      </div>
+      <div class="callout info">
+        <div class="callout-icon">💡</div>
+        <p><strong>noEmit: true</strong> — TypeScript compiler itself does NOT produce output files. It only type-checks. Actual JS emission is handled by <code>ts-loader</code> in webpack. This prevents double-compilation and conflicts.</p>
+      </div>
+    </div>
+    <div>
+      <div class="card card-violet" style="margin-bottom:10px">
+        <div class="card-label violet">📦 package.json — Key Dependencies</div>
+        <ul>
+          <li><strong style="color:var(--text)">react@^16.14.0</strong> — must be 16 for Jira DC</li>
+          <li><strong style="color:var(--text)">react-dom@^16.14.0</strong> — DEFAULT import (not <code>* as ReactDOM</code>)</li>
+          <li><strong style="color:var(--text)">@types/react@16.9.0</strong> — EXACT pin — no ^ or ~</li>
+          <li><strong style="color:var(--text)">@types/react-dom@16.9.0</strong> — EXACT pin — no ^ or ~</li>
+          <li><strong style="color:var(--text)">atlassian-webresource-webpack-plugin</strong> — generates wr-defs.xml</li>
+          <li><strong style="color:var(--text)">webpack + webpack-cli + ts-loader + typescript</strong> — build chain</li>
+          <li><strong style="color:var(--text)">mini-css-extract-plugin + css-loader</strong> — CSS extraction</li>
+        </ul>
+      </div>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Problem</th><th>Root Cause</th><th>Fix</th></tr></thead>
+          <tbody>
+            <tr><td class="mono">@types/react@^16 → v19</td><td>Types have independent versioning</td><td class="green">Pin exact: @16.9.0</td></tr>
+            <tr><td class="mono">'render' not on ReactDOM</td><td>v18+ types removed render()</td><td class="green">Default import + exact pin</td></tr>
+            <tr><td class="mono">react-jsx build fail</td><td>React 17+ only transform</td><td class="green">"jsx": "react"</td></tr>
+            <tr><td class="mono">ERESOLVE peer conflict</td><td>@testing-library needs React 18</td><td class="green">@testing-library/react@12</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+  SLIDE 6 · APP.TSX ROOT COMPONENT
+════════════════════════════════════════════ -->
+<div class="slide" data-label="App.tsx">
+  <div class="slide-eyebrow green">Section 3.1.4 · Root React Component</div>
+  <h2 class="slide-title"><span class="hl-green">App.tsx</span> — Root Component &amp; React Mount</h2>
+
+  <div class="g-65" style="gap:16px">
+    <div class="code-wrap">
+      <div class="code-label"><div class="code-filename"><div class="dot" style="background:#ff5f57"></div><div class="dot" style="background:#febc2e"></div><div class="dot" style="background:#28c840"></div>&nbsp;frontend/my-app/src/App.tsx</div><button class="copy-btn" onclick="copyCode(this)">⧉ Copy</button></div>
+      <pre><span class="tok-k">import</span> React <span class="tok-k">from</span> <span class="tok-s">'react'</span>; <span class="tok-c">// required with jsx: "react"</span>
+<span class="tok-k">import</span> ReactDOM <span class="tok-k">from</span> <span class="tok-s">'react-dom'</span>; <span class="tok-c">// DEFAULT import — NOT: import * as ReactDOM</span>
+<span class="tok-k">import</span> <span class="tok-s">'./App.css'</span>;
+<span class="tok-k">import</span> HomePage <span class="tok-k">from</span> <span class="tok-s">'./Page/HomePage'</span>;
+
+<span class="tok-k">interface</span> IProps { <span class="tok-p">contextPath</span>: <span class="tok-v">string</span>; }
+
+<span class="tok-c">// pluginKey : web-resource-key — must match wr-defs.xml &lt;web-resource key='entrypoint-app'&gt;</span>
+<span class="tok-k">const</span> PLUGIN_KEY = <span class="tok-s">'com.atlassian.aservo.myPlugin:entrypoint-app'</span>;
+
+<span class="tok-k">export default function</span> <span class="tok-fn">App</span>({ contextPath }: IProps) {
+
+  <span class="tok-c">// Build full Atlassian WRM URL for any static asset:</span>
+  <span class="tok-c">// → /jira/download/resources/com.atlassian.aservo.myPlugin:entrypoint-app/images/logo.svg</span>
+  <span class="tok-k">const</span> resourceUrl = (name: <span class="tok-v">string</span>) =>
+    <span class="tok-s">`${contextPath}/download/resources/${PLUGIN_KEY}/${name}`</span>;
+
+  <span class="tok-k">return</span> (
+    &lt;<span class="tok-t">div</span> className=<span class="tok-s">'App'</span>&gt;
+      &lt;<span class="tok-fn">HomePage</span> contextPath={contextPath} /&gt;
+    &lt;/<span class="tok-t">div</span>&gt;
+  );
+}
+
+<span class="tok-c">// MUST use 'load' event — Jira renders HTML via Velocity, not static index.html</span>
+<span class="tok-c">// Without this: React runs before #container exists → React Error #299</span>
+window.<span class="tok-fn">addEventListener</span>(<span class="tok-s">'load'</span>, () =&gt; {
+  <span class="tok-c">// AJS = Jira's global JS object, always present on any Jira page</span>
+  <span class="tok-c">// AJS.contextPath() → '/jira' in standard install</span>
+  <span class="tok-k">const</span> contextPath = window.AJS ? window.AJS.<span class="tok-fn">contextPath</span>() : <span class="tok-s">''</span>;
+  <span class="tok-k">const</span> wrapper = document.<span class="tok-fn">getElementById</span>(<span class="tok-s">'container'</span>);
+  wrapper ? ReactDOM.<span class="tok-fn">render</span>(&lt;<span class="tok-fn">App</span> contextPath={contextPath} /&gt;, wrapper) : <span class="tok-k">false</span>;
+});</pre>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div class="callout danger">
+        <div class="callout-icon">🚫</div>
+        <p><strong>window.addEventListener('load') is REQUIRED!</strong><br>Jira renders HTML via Velocity templates — not a static index.html. Without <code>'load'</code>, React runs before <code>#container</code> exists in the DOM → <strong>React Error #299: createRoot called on invalid container</strong>.</p>
+      </div>
+      <div class="callout warn">
+        <div class="callout-icon">⚠️</div>
+        <p><strong>Import ReactDOM as DEFAULT — not namespace:</strong><br><code>import ReactDOM from 'react-dom'</code> ✅<br><code>import * as ReactDOM from 'react-dom'</code> ❌ — namespace object lacks <code>.render()</code></p>
+      </div>
+      <div class="card card-green">
+        <div class="card-label green">🔗 resourceUrl() Pattern — How WRM URLs Work</div>
+        <p>Never import images via webpack (<code>import logo from './logo.svg'</code>). No publicPath value produces the correct WRM URL automatically. Instead, build the URL manually:</p>
+        <div class="code-wrap" style="margin-top:8px">
+          <div class="code-label"><div class="code-filename">Image URL pattern</div></div>
+          <pre><span class="tok-k">const</span> PLUGIN_KEY = <span class="tok-s">'com.atlassian.aservo.myPlugin:entrypoint-app'</span>;
+<span class="tok-c">// contextPath = '/jira' (from AJS.contextPath())</span>
+<span class="tok-k">const</span> imgUrl = <span class="tok-s">`${contextPath}/download/resources/${PLUGIN_KEY}/images/react.svg`</span>;
+<span class="tok-c">// → /jira/download/resources/com.atlassian.aservo.myPlugin:entrypoint-app/images/react.svg</span></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+  SLIDE 7 · POM.XML + ATLASSIAN-PLUGIN.XML
+════════════════════════════════════════════ -->
+<div class="slide" data-label="pom.xml">
+  <div class="slide-eyebrow orange">Section 3.2.1 – 3.2.2 · Backend Files</div>
+  <h2 class="slide-title"><span class="hl-orange">pom.xml</span> &amp; atlassian-plugin.xml</h2>
+
+  <div class="g2" style="gap:16px">
+    <div>
+      <div class="code-wrap">
+        <div class="code-label"><div class="code-filename">backend/pom.xml — key properties</div><button class="copy-btn" onclick="copyCode(this)">⧉ Copy</button></div>
+        <pre><span class="tok-c">&lt;!-- These form the WRM URL: groupId.artifactId:key --&gt;</span>
+&lt;<span class="tok-t">groupId</span>&gt;com.atlassian.aservo&lt;/<span class="tok-t">groupId</span>&gt;
+&lt;<span class="tok-t">artifactId</span>&gt;myPlugin&lt;/<span class="tok-t">artifactId</span>&gt;
+&lt;<span class="tok-t">version</span>&gt;1.0.0-SNAPSHOT&lt;/<span class="tok-t">version</span>&gt;
+&lt;<span class="tok-t">packaging</span>&gt;atlassian-plugin&lt;/<span class="tok-t">packaging</span>&gt; <span class="tok-c">&lt;!-- NOT jar --&gt;</span>
+
+&lt;<span class="tok-t">properties</span>&gt;
+  &lt;<span class="tok-t">jira.version</span>&gt;9.12.2&lt;/<span class="tok-t">jira.version</span>&gt;
+  &lt;<span class="tok-t">amps.version</span>&gt;9.1.1&lt;/<span class="tok-t">amps.version</span>&gt;
+  &lt;<span class="tok-t">maven.compiler.source</span>&gt;1.8&lt;/<span class="tok-t">maven.compiler.source</span>&gt; <span class="tok-c">&lt;!-- Java 8 --&gt;</span>
+  &lt;<span class="tok-t">maven.compiler.target</span>&gt;1.8&lt;/<span class="tok-t">maven.compiler.target</span>&gt;
+  &lt;<span class="tok-t">atlassian.plugin.key</span>&gt;${project.groupId}.${project.artifactId}&lt;/<span class="tok-t">atlassian.plugin.key</span>&gt;
+  <span class="tok-c">&lt;!-- resolves to: com.atlassian.aservo.myPlugin --&gt;</span>
+&lt;/<span class="tok-t">properties</span>&gt;</pre>
+      </div>
+      <div class="tbl-wrap" style="margin-top:8px">
+        <table>
+          <thead><tr><th>Dependency</th><th>Purpose</th><th>Scope</th></tr></thead>
+          <tbody>
+            <tr><td class="mono">jira-api</td><td>Jira API (UserManager etc.)</td><td class="cyan">provided</td></tr>
+            <tr><td class="mono">atlassian-template-renderer-api</td><td>Velocity template rendering</td><td class="cyan">provided</td></tr>
+            <tr><td class="mono">javax.servlet-api</td><td>HttpServlet, request/response</td><td class="cyan">provided</td></tr>
+            <tr><td class="mono">atlassian-spring-scanner-annotation</td><td>@ComponentImport, @Inject</td><td class="cyan">provided</td></tr>
+            <tr><td class="mono">junit</td><td>Unit testing</td><td class="cyan">test</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div>
+      <div class="code-wrap">
+        <div class="code-label"><div class="code-filename">backend/src/main/resources/atlassian-plugin.xml</div><button class="copy-btn" onclick="copyCode(this)">⧉ Copy</button></div>
+        <pre>&lt;<span class="tok-t">atlassian-plugin</span> <span class="tok-a">key</span>=<span class="tok-s">"${atlassian.plugin.key}"</span>
+                  <span class="tok-a">name</span>=<span class="tok-s">"${project.name}"</span> <span class="tok-a">plugins-version</span>=<span class="tok-s">"2"</span>&gt;
+
+  &lt;<span class="tok-t">resource</span> <span class="tok-a">type</span>=<span class="tok-s">"i18n"</span> <span class="tok-a">name</span>=<span class="tok-s">"i18n"</span> <span class="tok-a">location</span>=<span class="tok-s">"myPlugin"</span>/&gt;
+
+  <span class="tok-c">&lt;!-- Admin sidebar section --&gt;</span>
+  &lt;<span class="tok-t">web-section</span> <span class="tok-a">key</span>=<span class="tok-s">"myPluginSection"</span>
+               <span class="tok-a">location</span>=<span class="tok-s">"admin_plugins_menu"</span> <span class="tok-a">weight</span>=<span class="tok-s">"1000"</span>&gt;
+    &lt;<span class="tok-t">label</span> <span class="tok-a">key</span>=<span class="tok-s">"my-section.label"</span>/&gt;
+  &lt;/<span class="tok-t">web-section</span>&gt;
+
+  <span class="tok-c">&lt;!-- Sidebar link — /plugins/servlet is Atlassian prefix --&gt;</span>
+  &lt;<span class="tok-t">web-item</span> <span class="tok-a">key</span>=<span class="tok-s">"my-web-item"</span>
+            <span class="tok-a">section</span>=<span class="tok-s">"admin_plugins_menu/myPluginSection"</span>&gt;
+    &lt;<span class="tok-t">label</span> <span class="tok-a">key</span>=<span class="tok-s">"my-web-item.label"</span>/&gt;
+    &lt;<span class="tok-t">link</span> <span class="tok-a">linkId</span>=<span class="tok-s">"my-web-item-link"</span>&gt;/plugins/servlet/exportServlet&lt;/<span class="tok-t">link</span>&gt;
+    <span class="tok-c">&lt;!-- Full URL: /jira/plugins/servlet/exportServlet --&gt;</span>
+  &lt;/<span class="tok-t">web-item</span>&gt;
+
+  <span class="tok-c">&lt;!-- Servlet: url-pattern WITHOUT /plugins/servlet prefix --&gt;</span>
+  &lt;<span class="tok-t">servlet</span> <span class="tok-a">key</span>=<span class="tok-s">"my-servlet"</span>
+           <span class="tok-a">class</span>=<span class="tok-s">"com.atlassian.aservo.myPlugin.servlet.MyPluginServlet"</span>&gt;
+    &lt;<span class="tok-t">url-pattern</span>&gt;/exportServlet&lt;/<span class="tok-t">url-pattern</span>&gt;
+    <span class="tok-c">&lt;!-- Jira prepends /plugins/servlet automatically --&gt;</span>
+  &lt;/<span class="tok-t">servlet</span>&gt;
+
+  <span class="tok-c">&lt;!-- React bundle registered in wr-defs.xml (auto-generated) --&gt;</span>
+  <span class="tok-c">&lt;!-- Do NOT manually add web-resource here --&gt;</span>
+&lt;/<span class="tok-t">atlassian-plugin</span>&gt;</pre>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+  SLIDE 8 · SERVLET + OTHER BACKEND FILES
+════════════════════════════════════════════ -->
+<div class="slide" data-label="Servlet + Backend">
+  <div class="slide-eyebrow orange">Section 3.2.3 – 3.2.7 · Backend Files</div>
+  <h2 class="slide-title">Servlet, <span class="hl-orange">wr-defs.xml</span>, app.vm &amp; Spring</h2>
+
+  <div class="g2" style="gap:16px">
+    <div>
+      <div class="code-wrap">
+        <div class="code-label"><div class="code-filename">MyPluginServlet.java</div><button class="copy-btn" onclick="copyCode(this)">⧉ Copy</button></div>
+        <pre><span class="tok-k">public class</span> <span class="tok-fn">MyPluginServlet</span> <span class="tok-k">extends</span> HttpServlet {
+
+  <span class="tok-v">@ComponentImport</span> <span class="tok-c">// Atlassian DI: inject from Jira's OSGi registry</span>
+  <span class="tok-k">private final</span> TemplateRenderer templateRenderer;
+
+  <span class="tok-v">@Inject</span> <span class="tok-c">// JSR-330 injection</span>
+  <span class="tok-k">public</span> <span class="tok-fn">MyPluginServlet</span>(<span class="tok-k">final</span> TemplateRenderer templateRenderer) {
+    <span class="tok-k">this</span>.templateRenderer = templateRenderer;
+  }
+
+  <span class="tok-v">@Override</span>
+  <span class="tok-k">protected void</span> <span class="tok-fn">doGet</span>(HttpServletRequest req, HttpServletResponse res)
+      <span class="tok-k">throws</span> IOException {
+    Map&lt;String, Object&gt; context = <span class="tok-k">new</span> HashMap&lt;&gt;();
+    res.<span class="tok-fn">setContentType</span>(<span class="tok-s">"text/html;charset=UTF-8"</span>);
+    context.<span class="tok-fn">put</span>(<span class="tok-s">"contextPath"</span>, req.<span class="tok-fn">getContextPath</span>()); <span class="tok-c">// '/jira'</span>
+    templateRenderer.<span class="tok-fn">render</span>(<span class="tok-s">"templates/app.vm"</span>, context, res.<span class="tok-fn">getWriter</span>());
+  }
+}</pre>
+      </div>
+      <div class="code-wrap">
+        <div class="code-label"><div class="code-filename">myPlugin.properties — i18n labels</div><button class="copy-btn" onclick="copyCode(this)">⧉ Copy</button></div>
+        <pre>my-section.label=Export_CSV
+my-web-item.label=Export Data
+my-servlet.name=My Export Servlet</pre>
+      </div>
+      <div class="code-wrap">
+        <div class="code-label"><div class="code-filename">META-INF/spring/plugin-context.xml — Spring DI</div><button class="copy-btn" onclick="copyCode(this)">⧉ Copy</button></div>
+        <pre>&lt;<span class="tok-t">beans</span> xmlns=<span class="tok-s">"http://www.springframework.org/schema/beans"</span> ...&gt;
+  <span class="tok-c">&lt;!-- Enables @ComponentImport and @Inject processing --&gt;</span>
+  &lt;<span class="tok-t">atlassian-scanner:scan-indexes</span>/&gt;
+&lt;/<span class="tok-t">beans</span>&gt;</pre>
+      </div>
+    </div>
+    <div>
+      <div class="code-wrap">
+        <div class="code-label"><div class="code-filename">wr-defs.xml — AUTO-GENERATED, never edit manually</div></div>
+        <pre><span class="tok-c">&lt;!-- Auto-generated by WrmPlugin on every npm run build --&gt;</span>
+&lt;<span class="tok-t">bundles</span>&gt;
+  &lt;<span class="tok-t">web-resource</span> <span class="tok-a">key</span>=<span class="tok-s">"entrypoint-app"</span>&gt;
+    <span class="tok-c">&lt;!-- Matches contextMap: {app:['app']} in webpack.config.js --&gt;</span>
+    <span class="tok-c">&lt;!-- Matches requireResourcesForContext('app') in app.vm --&gt;</span>
+    &lt;<span class="tok-t">context</span>&gt;app&lt;/<span class="tok-t">context</span>&gt;
+    &lt;<span class="tok-t">resource</span> <span class="tok-a">type</span>=<span class="tok-s">"download"</span> <span class="tok-a">name</span>=<span class="tok-s">"css/app.css"</span>
+              <span class="tok-a">location</span>=<span class="tok-s">"frontend/css/app.css"</span>/&gt;
+    &lt;<span class="tok-t">resource</span> <span class="tok-a">type</span>=<span class="tok-s">"download"</span> <span class="tok-a">name</span>=<span class="tok-s">"js/bundled.app.js"</span>
+              <span class="tok-a">location</span>=<span class="tok-s">"frontend/js/bundled.app.js"</span>/&gt;
+    &lt;<span class="tok-t">resource</span> <span class="tok-a">type</span>=<span class="tok-s">"download"</span> <span class="tok-a">name</span>=<span class="tok-s">"images/react.svg"</span>
+              <span class="tok-a">location</span>=<span class="tok-s">"frontend/images/react.svg"</span>&gt;
+      &lt;<span class="tok-t">param</span> <span class="tok-a">name</span>=<span class="tok-s">"content-type"</span> <span class="tok-a">value</span>=<span class="tok-s">"image/svg+xml"</span>/&gt;
+    &lt;/<span class="tok-t">resource</span>&gt;
+  &lt;/<span class="tok-t">web-resource</span>&gt;
+&lt;/<span class="tok-t">bundles</span>&gt;</pre>
+      </div>
+      <div class="callout warn">
+        <div class="callout-icon">⚠️</div>
+        <p><strong>wr-defs.xml is overwritten on every <code>npm run build</code>.</strong> Never edit it manually. Control its contents via <code>webpack.config.js</code> WrmPlugin options.</p>
+      </div>
+      <div class="code-wrap">
+        <div class="code-label"><div class="code-filename">templates/app.vm</div><button class="copy-btn" onclick="copyCode(this)">⧉ Copy</button></div>
+        <pre>&lt;<span class="tok-t">html</span>&gt;&lt;<span class="tok-t">head</span>&gt;
+  &lt;<span class="tok-t">content</span> <span class="tok-a">tag</span>=<span class="tok-s">'selectedWebItem'</span>&gt;app&lt;/<span class="tok-t">content</span>&gt;
+  &lt;<span class="tok-t">meta</span> <span class="tok-a">name</span>=<span class="tok-s">'decorator'</span> <span class="tok-a">content</span>=<span class="tok-s">'atl.admin'</span>/&gt;
+  <span class="tok-c">$webResourceManager.requireResourcesForContext('app')</span>
+&lt;/<span class="tok-t">head</span>&gt;
+&lt;<span class="tok-t">body</span>&gt;
+  &lt;<span class="tok-t">div</span> <span class="tok-a">id</span>=<span class="tok-s">'container'</span>&gt;&lt;/<span class="tok-t">div</span>&gt;
+&lt;/<span class="tok-t">body</span>&gt;&lt;/<span class="tok-t">html</span>&gt;</pre>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+  SLIDE 9 · VELOCITY + DECORATORS
+════════════════════════════════════════════ -->
+<div class="slide" data-label="Velocity + Decorators">
+  <div class="slide-eyebrow violet">Section 3.2.4a · Velocity Reference</div>
+  <h2 class="slide-title">Velocity <span class="hl-violet">Syntax</span> &amp; Jira Page Decorators</h2>
+
+  <div class="g2" style="gap:16px">
+    <div>
+      <div class="tbl-wrap" style="margin-bottom:12px">
+        <table>
+          <thead><tr><th>Syntax</th><th>Meaning</th></tr></thead>
+          <tbody>
+            <tr><td class="mono">$variable</td><td>Output variable — error if null</td></tr>
+            <tr><td class="mono">$!{variable}</td><td>Safe output — empty string if null (preferred)</td></tr>
+            <tr><td class="mono">${variable}</td><td>Explicit boundary — when adjacent to other text</td></tr>
+            <tr><td class="mono">#if($x) ... #end</td><td>Conditional block</td></tr>
+            <tr><td class="mono">#foreach($i in $list) ... #end</td><td>Loop</td></tr>
+            <tr><td class="mono">## text</td><td>Comment — not rendered in HTML output</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="card card-violet">
+        <div class="card-label violet">🔗 contextPath: Java → Velocity → React</div>
+        <div class="code-wrap" style="margin-top:8px">
+          <div class="code-label"><div class="code-filename">Three ways to access contextPath</div></div>
+          <pre><span class="tok-c">// 1. Java servlet sets it:</span>
+context.<span class="tok-fn">put</span>(<span class="tok-s">"contextPath"</span>, req.<span class="tok-fn">getContextPath</span>());
+<span class="tok-c">// req.getContextPath() → '/jira'</span>
+
+<span class="tok-c">// 2. Velocity template can render it:</span>
+<span class="tok-s">$!{contextPath}</span> <span class="tok-c">// → /jira</span>
+
+<span class="tok-c">// 3. React uses AJS (preferred — always correct, never null):</span>
+<span class="tok-k">const</span> contextPath = window.AJS ? window.AJS.<span class="tok-fn">contextPath</span>() : <span class="tok-s">''</span>;</pre>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="tbl-wrap" style="margin-bottom:12px">
+        <table>
+          <thead><tr><th>Decorator</th><th>What it renders</th><th>Use for</th></tr></thead>
+          <tbody>
+            <tr><td class="mono">atl.admin</td><td>Jira header + admin left sidebar (Apps section)</td><td class="amber">admin_plugins_menu pages</td></tr>
+            <tr><td class="mono">atl.general</td><td>Jira header + full main navigation bar</td><td>User-facing dashboards</td></tr>
+            <tr><td class="mono">atl.popup</td><td>Minimal chrome — content only</td><td>Dialog/popup windows</td></tr>
+            <tr><td class="mono">(none)</td><td>Raw HTML — no Jira chrome</td><td>AJAX responses</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="callout info">
+        <div class="callout-icon">📌</div>
+        <p><strong>This plugin uses <code>atl.admin</code></strong> because web-item uses <code>location='admin_plugins_menu'</code> — the page lives under Jira Administration. Use <code>atl.admin</code> to get the admin sidebar and correct nav highlighting.</p>
+      </div>
+      <div class="g2" style="gap:10px;margin-top:10px">
+        <div class="card card-amber">
+          <div class="card-label amber">atl.admin layout</div>
+          <div style="font-family:'Fira Code',monospace;font-size:0.68rem;color:var(--dim);line-height:1.8">
+            ┌──────────────────────┐<br>
+            │ Jira Header (Top Nav)│<br>
+            ├──────────┬───────────┤<br>
+            │ Admin    │           │<br>
+            │ Sidebar  │ Your Page │<br>
+            │ (Apps    │ &lt;div      │<br>
+            │ section) │ id=cont.&gt; │<br>
+            └──────────┴───────────┘
+          </div>
+        </div>
+        <div class="card card-cyan">
+          <div class="card-label cyan">atl.general layout</div>
+          <div style="font-family:'Fira Code',monospace;font-size:0.68rem;color:var(--dim);line-height:1.8">
+            ┌──────────────────────┐<br>
+            │ Jira Header (Top Nav)│<br>
+            ├──────────────────────┤<br>
+            │ Main Nav Bar         │<br>
+            ├──────────────────────┤<br>
+            │                      │<br>
+            │ Your Page Content    │<br>
+            │ &lt;div id=container&gt;   │<br>
+            └──────────────────────┘
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+  SLIDE 10 · WEBPACK + WRM INTEGRATION
+════════════════════════════════════════════ -->
+<div class="slide" data-label="WRM Integration">
+  <div class="slide-eyebrow amber">Section 4 · Build Integration</div>
+  <h2 class="slide-title">webpack + <span class="hl-amber">WRM</span> Integration — The contextMap Bridge</h2>
+
+  <div class="g-56" style="gap:16px">
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div class="callout danger">
+        <div class="callout-icon">🔗</div>
+        <p><strong>Three files — one string must match in ALL of them!</strong><br>If any one differs, Jira <em>silently</em> skips injecting your React bundle.</p>
+      </div>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>File</th><th>The string</th><th>Effect</th></tr></thead>
+          <tbody>
+            <tr><td class="mono">webpack.config.js</td><td><code>contextMap: &#123; app: ['app'] &#125;</code></td><td class="amber">Tags all files from entry 'app' with Jira context 'app'</td></tr>
+            <tr><td class="mono">wr-defs.xml</td><td><code>&lt;context&gt;app&lt;/context&gt;</code></td><td class="amber">The tag WRM uses to look up resources to inject</td></tr>
+            <tr><td class="mono">app.vm</td><td><code>requireResourcesForContext('app')</code></td><td class="amber">Tells WRM: inject everything tagged 'app'</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div style="background:var(--card);border:1px solid var(--border2);border-radius:12px;padding:14px">
+        <div style="font-size:0.58rem;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:10px">Full Build Pipeline</div>
+        <div class="steps-list" style="gap:6px">
+          <div class="step-item">
+            <div class="step-num-badge" style="background:rgba(251,191,36,0.12);color:var(--amber);border:1px solid rgba(251,191,36,0.3)">1</div>
+            <div class="si-content"><h4 style="color:var(--amber)">npm run build</h4><p>webpack processes src/App.tsx — ts-loader, MiniCss, WrmPlugin</p></div>
+          </div>
+          <div class="step-item">
+            <div class="step-num-badge" style="background:rgba(34,211,238,0.12);color:var(--cyan);border:1px solid rgba(34,211,238,0.3)">2</div>
+            <div class="si-content"><h4 style="color:var(--cyan)">WrmPlugin writes wr-defs.xml</h4><p>Reads entry points and emitted files → writes META-INF/plugin-descriptors/wr-defs.xml</p></div>
+          </div>
+          <div class="step-item">
+            <div class="step-num-badge" style="background:rgba(167,139,250,0.12);color:var(--violet);border:1px solid rgba(167,139,250,0.3)">3</div>
+            <div class="si-content"><h4 style="color:var(--violet)">Output to backend/resources/frontend/</h4><p>js/bundled.app.js · css/app.css · images/react.svg</p></div>
+          </div>
+          <div class="step-item">
+            <div class="step-num-badge" style="background:rgba(74,222,128,0.12);color:var(--green);border:1px solid rgba(74,222,128,0.3)">4</div>
+            <div class="si-content"><h4 style="color:var(--green)">atlas-package — Maven packages .jar</h4><p>Compiles Java, bundles frontend/ + wr-defs.xml into the plugin .jar</p></div>
+          </div>
+          <div class="step-item">
+            <div class="step-num-badge" style="background:rgba(96,165,250,0.12);color:var(--blue);border:1px solid rgba(96,165,250,0.3)">5</div>
+            <div class="si-content"><h4 style="color:var(--blue)">Jira loads .jar — scans plugin-descriptors/</h4><p>Registers &lt;web-resource&gt; entries from wr-defs.xml with WRM at startup (Atlassian-Scan-Folders)</p></div>
+          </div>
+          <div class="step-item">
+            <div class="step-num-badge" style="background:rgba(244,114,182,0.12);color:var(--pink);border:1px solid rgba(244,114,182,0.3)">6</div>
+            <div class="si-content"><h4 style="color:var(--pink)">Browser request → WRM injects bundle</h4><p>requireResourcesForContext('app') → &lt;script&gt; + &lt;link&gt; injected → React mounts on #container</p></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div class="card card-cyan">
+        <div class="card-label cyan">🔗 How web-item Links to Servlet</div>
+        <div class="code-wrap" style="margin-top:8px">
+          <div class="code-label"><div class="code-filename">atlassian-plugin.xml</div></div>
+          <pre><span class="tok-c">&lt;!-- 1. User clicks this link in admin sidebar --&gt;</span>
+&lt;<span class="tok-t">web-item</span> <span class="tok-a">section</span>=<span class="tok-s">"admin_plugins_menu/myPluginSection"</span>&gt;
+  &lt;<span class="tok-t">link</span>&gt;/plugins/servlet/exportServlet&lt;/<span class="tok-t">link</span>&gt;
+  <span class="tok-c">&lt;!-- Full Jira URL: /jira/plugins/servlet/exportServlet --&gt;</span>
+&lt;/<span class="tok-t">web-item</span>&gt;
+
+<span class="tok-c">&lt;!-- 2. Jira routes to this servlet --&gt;</span>
+&lt;<span class="tok-t">servlet</span> <span class="tok-a">class</span>=<span class="tok-s">"...MyPluginServlet"</span>&gt;
+  &lt;<span class="tok-t">url-pattern</span>&gt;/exportServlet&lt;/<span class="tok-t">url-pattern</span>&gt;
+  <span class="tok-c">&lt;!-- NO /plugins/servlet prefix here -- Jira adds it --&gt;</span>
+&lt;/<span class="tok-t">servlet</span>&gt;</pre>
+        </div>
+      </div>
+      <div class="callout info">
+        <div class="callout-icon">🏗️</div>
+        <p><strong>Dev loop:</strong> Terminal 1: <code>atlas-run</code> → Jira at <code>localhost:2990/jira</code> (admin/admin). Terminal 2: <code>npm run build</code> (watch:true auto-rebuilds). <code>atlas-run</code> detects new files and hot-reloads automatically.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+  SLIDE 11 · COMMON ISSUES: REACT + IMAGES
+════════════════════════════════════════════ -->
+<div class="slide" data-label="Errors 1/2">
+  <div class="slide-eyebrow red">Section 5.1 – 5.2 · Common Issues</div>
+  <h2 class="slide-title">React Error <span class="hl-red">#299</span> &amp; Image 404s</h2>
+
+  <div class="g2" style="gap:16px">
+    <div>
+      <div class="callout danger" style="margin-bottom:10px">
+        <div class="callout-icon">🚨</div>
+        <p><strong>React Error #299 — createRoot on invalid container</strong><br>Root cause: React 18 uses <code>createRoot()</code> not compatible with Jira DC. Even with React 16: mounting synchronously runs before Jira renders #container.</p>
+      </div>
+      <div class="diff-grid">
+        <div class="diff-panel before">
+          <div class="diff-header">✗ Wrong — React 18 pattern</div>
+          <pre><span class="tok-k">import</span> ReactDOM <span class="tok-k">from</span> <span class="tok-s">'react-dom/client'</span>;
+
+ReactDOM
+  .<span class="tok-fn">createRoot</span>(document.<span class="tok-fn">getElementById</span>(<span class="tok-s">'container'</span>))
+  .<span class="tok-fn">render</span>(&lt;<span class="tok-fn">App</span>/&gt;);</pre>
+        </div>
+        <div class="diff-panel after">
+          <div class="diff-header">✓ Correct — React 16 + Jira</div>
+          <pre><span class="tok-k">import</span> ReactDOM <span class="tok-k">from</span> <span class="tok-s">'react-dom'</span>; <span class="tok-c">// default!</span>
+
+window.<span class="tok-fn">addEventListener</span>(<span class="tok-s">'load'</span>, () =&gt; {
+  <span class="tok-k">const</span> ctx = window.AJS?.<span class="tok-fn">contextPath</span>() ?? <span class="tok-s">''</span>;
+  <span class="tok-k">const</span> el = document.<span class="tok-fn">getElementById</span>(<span class="tok-s">'container'</span>);
+  el &amp;&amp; ReactDOM.<span class="tok-fn">render</span>(&lt;<span class="tok-fn">App</span> contextPath={ctx}/&gt;, el);
+});</pre>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="callout danger" style="margin-bottom:10px">
+        <div class="callout-icon">🚨</div>
+        <p><strong>Image 404 — no publicPath works automatically under WRM!</strong></p>
+      </div>
+      <div class="tbl-wrap" style="margin-bottom:10px">
+        <table>
+          <thead><tr><th>publicPath</th><th>What webpack writes</th><th>Result</th></tr></thead>
+          <tbody>
+            <tr><td class="mono">/ (default)</td><td><code>src='/images/logo.png'</code></td><td class="red">404 — not WRM path</td></tr>
+            <tr><td class="mono">auto</td><td>Guesses from script URL</td><td class="red">Unreliable in Jira</td></tr>
+            <tr><td class="mono">'' (empty)</td><td><code>src='images/logo.png'</code></td><td class="red">Relative to page URL — wrong</td></tr>
+            <tr><td class="mono">Full WRM URL</td><td>Correct path hardcoded</td><td class="amber">Works but breaks if key changes</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="callout success">
+        <div class="callout-icon">✅</div>
+        <p><strong>Correct fix: build WRM URL manually in React (never import images via webpack)</strong></p>
+      </div>
+      <div class="code-wrap">
+        <div class="code-label"><div class="code-filename">Correct image URL pattern</div><button class="copy-btn" onclick="copyCode(this)">⧉ Copy</button></div>
+        <pre><span class="tok-c">// WRONG — webpack import breaks under WRM</span>
+<span class="tok-k">import</span> logo <span class="tok-k">from</span> <span class="tok-s">'./react.svg'</span>; <span class="tok-c">// ❌ never do this</span>
+
+<span class="tok-c">// CORRECT — build full WRM URL at runtime</span>
+<span class="tok-k">const</span> PLUGIN_KEY = <span class="tok-s">'com.atlassian.aservo.myPlugin:entrypoint-app'</span>;
+<span class="tok-k">const</span> imgUrl = <span class="tok-s">`${contextPath}/download/resources/${PLUGIN_KEY}/images/react.svg`</span>;
+<span class="tok-c">// → /jira/download/resources/com.atlassian.aservo.myPlugin:entrypoint-app/images/react.svg</span>
+<span class="tok-c">// Verify: paste this URL directly in the browser — should show the image</span></pre>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+  SLIDE 12 · COMMON ISSUES: TS + SVG + DEPS
+════════════════════════════════════════════ -->
+<div class="slide" data-label="Errors 2/2">
+  <div class="slide-eyebrow red">Section 5.3 – 5.6 · Common Issues</div>
+  <h2 class="slide-title">TypeScript Errors, <span class="hl-red">SVG Loader</span> &amp; Dependency Conflicts</h2>
+
+  <div class="g2" style="gap:16px">
+    <div>
+      <div class="card card-red" style="margin-bottom:10px">
+        <div class="card-label red">🚨 Error: 'render' does not exist on typeof ReactDOM</div>
+        <p><strong style="color:var(--text)">Root cause:</strong> npm resolved <code>@types/react-dom@^16</code> to v19+ (independent versioning). v18+ removed <code>ReactDOM.render()</code>.</p>
+        <div class="code-wrap" style="margin-top:8px">
+          <div class="code-label"><div class="code-filename">Fix</div><button class="copy-btn" onclick="copyCode(this)">⧉ Copy</button></div>
+          <pre><span class="tok-c"># Pin EXACT version — no ^ or ~</span>
+<span class="tok-fn">npm</span> install @types/react@16.9.0 @types/react-dom@16.9.0 --save-dev --legacy-peer-deps
+
+<span class="tok-c">// Use default import (NOT namespace import):</span>
+<span class="tok-k">import</span> ReactDOM <span class="tok-k">from</span> <span class="tok-s">'react-dom'</span>;     <span class="tok-c">// ✅ .render() on default export</span>
+<span class="tok-k">import</span> * <span class="tok-k">as</span> ReactDOM <span class="tok-k">from</span> <span class="tok-s">'react-dom'</span>; <span class="tok-c">// ❌ namespace lacks .render()</span></pre>
+        </div>
+      </div>
+      <div class="card card-red">
+        <div class="card-label red">🚨 Error: "react-jsx" build failure / React is not defined</div>
+        <p><strong style="color:var(--text)">Root cause:</strong> <code>"react-jsx"</code> is the React 17+ automatic JSX transform. React 16 does not support it.</p>
+        <div class="code-wrap" style="margin-top:8px">
+          <div class="code-label"><div class="code-filename">tsconfig.json fix</div><button class="copy-btn" onclick="copyCode(this)">⧉ Copy</button></div>
+          <pre><span class="tok-x">"jsx"</span>: <span class="tok-s">"react"</span>     <span class="tok-c">// ✅ correct for React 16</span>
+<span class="tok-x">"jsx"</span>: <span class="tok-s">"react-jsx"</span> <span class="tok-c">// ❌ React 17+ only — WRONG</span></pre>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="card card-red" style="margin-bottom:10px">
+        <div class="card-label red">🚨 Error: Module parse failed — SVG Loader Error</div>
+        <p><strong style="color:var(--text)">Root cause:</strong> <code>import logo from './react.svg'</code> treats SVG as a JS module without a loader.</p>
+        <p style="margin-top:6px"><strong style="color:var(--text)">Recommended fix:</strong> Delete the import entirely. Use full WRM URL in React instead (see Slide 11).</p>
+        <p style="margin-top:6px"><strong style="color:var(--text)">Alternative fix:</strong> Add type declaration:</p>
+        <div class="code-wrap" style="margin-top:8px">
+          <div class="code-label"><div class="code-filename">src/declarations.d.ts</div><button class="copy-btn" onclick="copyCode(this)">⧉ Copy</button></div>
+          <pre><span class="tok-k">declare</span> module <span class="tok-s">'*.svg'</span> { <span class="tok-k">const</span> content: <span class="tok-v">string</span>; <span class="tok-k">export default</span> content; }
+<span class="tok-c">// + webpack.config.js must include the asset/resource rule for .svg</span></pre>
+        </div>
+      </div>
+      <div class="card card-red">
+        <div class="card-label red">🚨 Error: ERESOLVE dependency conflict on npm install</div>
+        <p><strong style="color:var(--text)">Root cause:</strong> <code>@testing-library/react@16</code> requires <code>react@^18</code> but project has react@16.</p>
+        <div class="code-wrap" style="margin-top:8px">
+          <div class="code-label"><div class="code-filename">Fix — install v12 (last version for React 16)</div><button class="copy-btn" onclick="copyCode(this)">⧉ Copy</button></div>
+          <pre><span class="tok-fn">npm</span> install @testing-library/react@12 --save-dev --legacy-peer-deps
+<span class="tok-c"># v12 is the last version compatible with React 16</span></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+  SLIDE 13 · BUILD & DEPLOY
+════════════════════════════════════════════ -->
+<div class="slide" data-label="Build & Deploy">
+  <div class="slide-eyebrow green">Section 6 · Build &amp; Deploy</div>
+  <h2 class="slide-title">Build &amp; <span class="hl-green">Deploy</span> Reference</h2>
+
+  <div class="g2" style="gap:16px">
+    <div>
+      <div class="code-wrap">
+        <div class="code-label"><div class="code-filename"><div class="dot" style="background:#ff5f57"></div><div class="dot" style="background:#febc2e"></div><div class="dot" style="background:#28c840"></div>&nbsp;Development workflow — 2 terminals</div><button class="copy-btn" onclick="copyCode(this)">⧉ Copy</button></div>
+        <pre><span class="tok-c"># Terminal 1 — Start Jira with plugin loaded</span>
+<span class="tok-fn">cd</span> myExportPlugin
+<span class="tok-fn">atlas-run</span>
+<span class="tok-c"># → Jira at: http://localhost:2990/jira (login: admin / admin)</span>
+
+<span class="tok-c"># Terminal 2 — Build frontend in watch mode</span>
+<span class="tok-fn">cd</span> frontend/my-app
+<span class="tok-fn">npm</span> run build
+<span class="tok-c"># watch:true auto-rebuilds on file changes</span>
+<span class="tok-c"># atlas-run detects new files → hot-reloads plugin</span></pre>
+      </div>
+      <div class="code-wrap">
+        <div class="code-label"><div class="code-filename">Production build</div><button class="copy-btn" onclick="copyCode(this)">⧉ Copy</button></div>
+        <pre><span class="tok-fn">cd</span> frontend/my-app && <span class="tok-fn">npm</span> run build
+<span class="tok-fn">cd</span> ../../
+<span class="tok-fn">atlas-package</span> -DskipTests
+<span class="tok-c"># Output: backend/target/myPlugin-1.0.0-SNAPSHOT.jar</span></pre>
+      </div>
+      <div class="code-wrap">
+        <div class="code-label"><div class="code-filename">Release — remove SNAPSHOT</div><button class="copy-btn" onclick="copyCode(this)">⧉ Copy</button></div>
+        <pre><span class="tok-c">&lt;!-- pom.xml --&gt;</span>
+&lt;<span class="tok-t">version</span>&gt;1.0.0&lt;/<span class="tok-t">version</span>&gt;
+<span class="tok-c"># Output: backend/target/myPlugin-1.0.0.jar</span></pre>
+      </div>
+    </div>
+    <div>
+      <div class="divider"><div class="divider-line"></div><div class="divider-text">Deploy to Jira Server</div><div class="divider-line"></div></div>
+      <div class="steps-list">
+        <div class="step-item">
+          <div class="step-num-badge" style="background:rgba(74,222,128,0.12);color:var(--green);border:1px solid rgba(74,222,128,0.3)">★</div>
+          <div class="si-content">
+            <h4 style="color:var(--green)">Option 1 — Admin UI (Recommended)</h4>
+            <p>Navigate to <code>http://your-jira/plugins/servlet/upm</code> → Click 'Upload app' → Select the .jar → Jira installs and activates immediately.</p>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-num-badge" style="background:rgba(96,165,250,0.12);color:var(--blue);border:1px solid rgba(96,165,250,0.3)">2</div>
+          <div class="si-content">
+            <h4 style="color:var(--blue)">Option 2 — Copy to plugins folder</h4>
+            <div class="code-wrap" style="margin-top:6px">
+              <div class="code-label"><div class="code-filename">shell</div></div>
+              <pre><span class="tok-fn">cp</span> backend/target/myPlugin-1.0.0-SNAPSHOT.jar \
+  /path/to/jira-home/plugins/installed-plugins/</pre>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="divider" style="margin-top:14px"><div class="divider-line"></div><div class="divider-text">Full npm command reference</div><div class="divider-line"></div></div>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Command</th><th>What it does</th></tr></thead>
+          <tbody>
+            <tr><td class="mono">npm install</td><td>Install all packages in package.json</td></tr>
+            <tr><td class="mono">npm install --legacy-peer-deps</td><td>Ignore peer dependency conflicts</td></tr>
+            <tr><td class="mono">npm run build</td><td>webpack → output to backend/resources/frontend/</td></tr>
+            <tr><td class="mono">npm ci</td><td>Clean install from lock file exactly</td></tr>
+            <tr><td class="mono">atlas-run</td><td>Start Jira at localhost:2990/jira</td></tr>
+            <tr><td class="mono">atlas-package</td><td>Package plugin as .jar</td></tr>
+            <tr><td class="mono">atlas-package -DskipTests</td><td>Package .jar skipping unit tests</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+  SLIDE 14 · QUICK REFERENCE — MUST-MATCH STRINGS
+════════════════════════════════════════════ -->
+<div class="slide" data-label="Quick Ref">
+  <div class="slide-eyebrow amber">Section 7 · Quick Reference</div>
+  <h2 class="slide-title">Must-Match <span class="hl-amber">Strings</span> &amp; Important URLs</h2>
+
+  <div class="g2" style="gap:16px">
+    <div>
+      <div class="callout danger" style="margin-bottom:12px">
+        <div class="callout-icon">⚠️</div>
+        <p><strong>Consistency Check — these 8 strings must ALL align exactly:</strong></p>
+      </div>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>#</th><th>File</th><th>The string</th></tr></thead>
+          <tbody>
+            <tr><td class="mono" style="color:var(--amber)">1</td><td>webpack.config.js contextMap key</td><td class="mono">app</td></tr>
+            <tr><td class="mono" style="color:var(--amber)">2</td><td>wr-defs.xml context tag</td><td class="mono">&lt;context&gt;app&lt;/context&gt;</td></tr>
+            <tr><td class="mono" style="color:var(--amber)">3</td><td>app.vm WRM call</td><td class="mono">requireResourcesForContext('app')</td></tr>
+            <tr><td class="mono" style="color:var(--cyan)">4</td><td>webpack.config.js pluginKey</td><td class="mono">com.atlassian.aservo.myPlugin</td></tr>
+            <tr><td class="mono" style="color:var(--cyan)">5</td><td>pom.xml groupId + artifactId</td><td class="mono">com.atlassian.aservo + myPlugin</td></tr>
+            <tr><td class="mono" style="color:var(--cyan)">6</td><td>atlassian-plugin.xml key</td><td class="mono">${atlassian.plugin.key}</td></tr>
+            <tr><td class="mono" style="color:var(--violet)">7</td><td>Servlet url-pattern</td><td class="mono">/exportServlet</td></tr>
+            <tr><td class="mono" style="color:var(--violet)">8</td><td>web-item link</td><td class="mono">/plugins/servlet/exportServlet</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div>
+      <div class="divider"><div class="divider-line"></div><div class="divider-text">Important URLs</div><div class="divider-line"></div></div>
+      <div class="url-list">
+        <div class="url-row"><span class="url-type">Plugin page</span><span class="url-val">http://localhost:2990/jira/plugins/servlet/exportServlet</span></div>
+        <div class="url-row"><span class="url-type">Admin panel</span><span class="url-val">http://localhost:2990/jira/secure/Administration.jspa</span></div>
+        <div class="url-row"><span class="url-type">Plugin Manager (UPM)</span><span class="url-val">http://localhost:2990/jira/plugins/servlet/upm</span></div>
+        <div class="url-row hl"><span class="url-type">Test JS bundle</span><span class="url-val">http://localhost:2990/jira/download/resources/com.atlassian.aservo.myPlugin:entrypoint-app/js/bundled.app.js</span></div>
+        <div class="url-row hl"><span class="url-type">Test image</span><span class="url-val">http://localhost:2990/jira/download/resources/com.atlassian.aservo.myPlugin:entrypoint-app/images/react.svg</span></div>
+      </div>
+      <div class="divider" style="margin-top:12px"><div class="divider-line"></div><div class="divider-text">Reference Links</div><div class="divider-line"></div></div>
+      <div class="card card-amber">
+        <ul style="gap:6px">
+          <li>Reference Plugin (Bitbucket): <code style="font-size:0.75em">bitbucket.org/itsuperhighway/jira-data-center-scheduled-job</code></li>
+          <li>Atlassian SDK Install: <code style="font-size:0.75em">developer.atlassian.com/server/framework/atlassian-sdk/</code></li>
+          <li>Atlassian Dev Docs: <code style="font-size:0.75em">developer.atlassian.com/server/jira/platform/</code></li>
+          <li>WRM Documentation: <code style="font-size:0.75em">developer.atlassian.com/server/framework/atlassian-sdk/web-resource-manager/</code></li>
+          <li>Adoptium JDK 8: <code style="font-size:0.75em">adoptium.net</code></li>
+          <li>nvm-windows: <code style="font-size:0.75em">github.com/coreybutler/nvm-windows</code></li>
+          <li>Video Tutorial: <code style="font-size:0.75em">youtube.com/watch?v=Tkr09z0c13w</code></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+  SLIDE 15 · ERROR SUMMARY TABLE
+════════════════════════════════════════════ -->
+<div class="slide" data-label="All Errors">
+  <div class="slide-eyebrow red">Complete Error Reference</div>
+  <h2 class="slide-title">All <span class="hl-red">Errors</span> — Root Causes &amp; Fixes</h2>
+
+  <div class="tbl-wrap" style="margin-bottom:14px">
+    <table>
+      <thead><tr><th>Error</th><th>Root Cause</th><th>Fix</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">React Error #299: createRoot on invalid container</td><td>React 18 createRoot() or React runs before #container exists in DOM</td><td class="green">Use React 16 + wrap mount in window.addEventListener('load')</td></tr>
+        <tr><td class="mono">Image → 404 in browser</td><td>No publicPath value produces a correct Atlassian WRM URL automatically</td><td class="green">Build WRM URL manually: contextPath + /download/resources/ + PLUGIN_KEY + filename</td></tr>
+        <tr><td class="mono">'render' does not exist on typeof ReactDOM</td><td>@types/react-dom@^16 resolved to v19+ (independent versioning), which removed render()</td><td class="green">Pin exact: @types/react@16.9.0, use default import</td></tr>
+        <tr><td class="mono">Build fails / 'React is not defined'</td><td>"jsx": "react-jsx" in tsconfig — React 17+ only transform</td><td class="green">Set "jsx": "react" in tsconfig.json</td></tr>
+        <tr><td class="mono">Module parse failed: Unexpected token</td><td>import logo from './logo.svg' treats SVG as JS module</td><td class="green">Delete import; use WRM URL instead. Or add *.svg declaration.d.ts</td></tr>
+        <tr><td class="mono">ERESOLVE peer dependency conflict</td><td>@testing-library/react@16 requires react@^18 but project has react@16</td><td class="green">npm install @testing-library/react@12 --save-dev --legacy-peer-deps</td></tr>
+        <tr><td class="mono">Jira silently doesn't inject bundle</td><td>contextMap key, &lt;context&gt; tag, or requireResourcesForContext() string mismatch</td><td class="green">All three must match exactly — check webpack.config.js, wr-defs.xml, app.vm</td></tr>
+        <tr><td class="mono">atlas-run fails — Maven compiler error</td><td>Installed JDK version doesn't match maven.compiler.source in pom.xml</td><td class="green">Install Java 8 Temurin, match pom.xml: &lt;maven.compiler.source&gt;1.8&lt;/maven.compiler.source&gt;</td></tr>
+        <tr><td class="mono">WRM URL 404 — image registered but missing</td><td>npm run build not re-run after adding image file</td><td class="green">Run npm run build, verify wr-defs.xml has resource entry for the image</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="g3" style="gap:10px">
+    <div class="callout info">
+      <div class="callout-icon">💡</div>
+      <p><strong>Debug checklist:</strong> (1) Check browser console for React errors. (2) Network tab — are .js and .css loaded with 200? (3) Paste WRM URLs directly in browser to verify 200 vs 404. (4) Check that wr-defs.xml was regenerated after last build.</p>
+    </div>
+    <div class="callout warn">
+      <div class="callout-icon">⚠️</div>
+      <p><strong>Common gotcha:</strong> After updating package.json, always do a clean install: <code>Remove-Item -Recurse -Force node_modules</code> + <code>Remove-Item package-lock.json</code> + <code>npm install</code> to avoid stale dependency issues.</p>
+    </div>
+    <div class="callout success">
+      <div class="callout-icon">✅</div>
+      <p><strong>Expected output after successful build:</strong><br><code>frontend/js/bundled.app.js</code><br><code>frontend/css/app.css</code><br><code>frontend/images/react.svg</code><br><code>META-INF/plugin-descriptors/wr-defs.xml</code></p>
+    </div>
+  </div>
+</div>
+
+</div><!-- /slides-track -->
+
+<div class="progress" id="progress"></div>
+<div class="kbd-hint"><span class="kbd">←</span><span class="kbd">→</span> navigate · <span class="kbd">scroll</span> within slide</div>
+
+<script>
+const TOTAL = 16;
+let cur = 0;
+const track = document.getElementById('track');
+const counter = document.getElementById('counter');
+const btnPrev = document.getElementById('btnPrev');
+const btnNext = document.getElementById('btnNext');
+const progress = document.getElementById('progress');
+const tabsEl = document.getElementById('navTabs');
+const slides = track.querySelectorAll('.slide');
+
+// Build tabs
+const tabs = [];
+slides.forEach((s, i) => {
+  const lbl = s.dataset.label || (i+1);
+  const btn = document.createElement('button');
+  btn.className = 'nav-tab' + (i===0?' active':'');
+  btn.textContent = lbl;
+  btn.onclick = () => go(i);
+  tabsEl.appendChild(btn);
+  tabs.push(btn);
+});
+
+function go(n) {
+  if (n < 0 || n >= TOTAL) return;
+  slides[cur].classList.remove('active');
+  tabs[cur].classList.remove('active');
+  cur = n;
+  slides[cur].classList.add('active');
+  slides[cur].scrollTop = 0;
+  tabs[cur].classList.add('active');
+  tabs[cur].scrollIntoView({behavior:'smooth', block:'nearest', inline:'nearest'});
+  track.style.transform = `translateX(-${cur * 100}vw)`;
+  counter.textContent = `${cur+1} / ${TOTAL}`;
+  btnPrev.disabled = cur === 0;
+  btnNext.disabled = cur === TOTAL - 1;
+  progress.style.width = ((cur+1)/TOTAL*100) + '%';
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { e.preventDefault(); go(cur+1); }
+  if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   { e.preventDefault(); go(cur-1); }
+});
+
+let tx = 0;
+document.addEventListener('touchstart', e => { tx = e.touches[0].clientX; }, {passive:true});
+document.addEventListener('touchend', e => {
+  const dx = e.changedTouches[0].clientX - tx;
+  if (Math.abs(dx) > 50) dx < 0 ? go(cur+1) : go(cur-1);
+}, {passive:true});
+
+function copyCode(btn) {
+  const pre = btn.closest('.code-wrap').querySelector('pre');
+  navigator.clipboard.writeText(pre.innerText).then(() => {
+    btn.textContent = '✓ Copied!'; btn.classList.add('copied');
+    setTimeout(() => { btn.innerHTML = '⧉ Copy'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+
+go(0);
+</script>
+</body>
+</html>

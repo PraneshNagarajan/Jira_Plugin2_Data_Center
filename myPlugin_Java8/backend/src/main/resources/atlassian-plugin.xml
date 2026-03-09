@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<atlassian-plugin key="${atlassian.plugin.key}" name="${project.name}" plugins-version="2">
+
+  <plugin-info>
+    <description>${project.description}</description>
+    <version>${project.version}</version>
+    <vendor name="${project.organization.name}" url="${project.organization.url}"/>
+    <param name="plugin-icon">images/pluginIcon.png</param>
+    <param name="plugin-logo">images/pluginLogo.png</param>
+  </plugin-info>
+
+  <resource type="i18n" name="i18n" location="myPlugin"/>
+
+  <web-resource key="plugin-resources" name="plugin Resources">
+    <dependency>com.atlassian.auiplugin:ajs</dependency>
+    <resource type="download" name="main.js"  location="js/main.js"/>
+    <resource type="download" name="main.css" location="css/main.css"/>
+    <resource type="download" name="images/"  location="images/"/>
+    <context>plugin-resources</context>
+  </web-resource>
+
+  <web-section key="myPluginSection"
+               location="admin_plugins_menu"
+               weight="1000">
+    <label key="my-section.label"/>
+  </web-section>
+
+  <web-item key="my-web-item"
+            name="MyPluginApp"
+            i18n-name-key="my-web-item.name"
+            section="admin_plugins_menu/myPluginSection"
+            weight="1000">
+    <description key="my-web-item.description">The My Web Item Plugin</description>
+    <label key="my-web-item.label"/>
+    <link linkId="my-web-item-link">/plugins/servlet/exportServlet</link>
+  </web-item>
+
+  <servlet name="My Servlet"
+           i18n-name-key="my-servlet.name"
+           key="my-servlet"
+           class="com.atlassian.aservo.myPlugin.servlet.MyPluginServlet">
+    <description key="my-servlet.description">The My Servlet Plugin</description>
+    <url-pattern>/exportServlet</url-pattern>
+  </servlet>
+
+</atlassian-plugin>

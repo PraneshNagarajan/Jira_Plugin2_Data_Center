@@ -1,0 +1,16 @@
+<html>
+<head>
+    <title>App</title>
+    ## "alt.admin for Admin ui Layout "
+    ## "alt.general for General ui Layout"
+    <meta name="decorator" content="atl.admin"/>
+    $webResourceManager.requireResourcesForContext("app")
+</head>
+<body>
+    <div id="container" >
+    </div>
+<div>
+    <input class="text" type="text" id="contextPath" name="contextPath" >
+</div>
+</body>
+</html>

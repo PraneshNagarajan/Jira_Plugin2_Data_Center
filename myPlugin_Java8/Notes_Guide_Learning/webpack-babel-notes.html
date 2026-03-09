@@ -1,0 +1,1552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Webpack & Babel — Step-by-Step Notes</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #0a0e1a;
+  --surface: #111827;
+  --surface2: #1a2235;
+  --border: #1e2d45;
+  --border2: #243350;
+  --accent: #38bdf8;
+  --accent2: #818cf8;
+  --accent3: #34d399;
+  --accent4: #fb923c;
+  --accent5: #f472b6;
+  --yellow: #fbbf24;
+  --red: #f87171;
+  --text: #e2e8f0;
+  --muted: #64748b;
+  --dim: #94a3b8;
+  --code-bg: #0d1117;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Outfit', sans-serif;
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+/* ── HEADER ── */
+.hero {
+  background: linear-gradient(135deg, #0a0e1a 0%, #0d1526 50%, #0a1020 100%);
+  border-bottom: 1px solid var(--border);
+  padding: 60px 40px 50px;
+  position: relative;
+  overflow: hidden;
+}
+.hero::before {
+  content: '';
+  position: absolute;
+  top: -100px; right: -100px;
+  width: 500px; height: 500px;
+  background: radial-gradient(circle, rgba(56,189,248,0.07) 0%, transparent 70%);
+  pointer-events: none;
+}
+.hero::after {
+  content: '';
+  position: absolute;
+  bottom: -80px; left: 30%;
+  width: 400px; height: 400px;
+  background: radial-gradient(circle, rgba(129,140,248,0.05) 0%, transparent 70%);
+  pointer-events: none;
+}
+.hero-inner { max-width: 1100px; margin: 0 auto; position: relative; }
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: rgba(56,189,248,0.1); border: 1px solid rgba(56,189,248,0.25);
+  color: var(--accent); padding: 5px 14px; border-radius: 20px;
+  font-size: 0.72rem; letter-spacing: 2px; text-transform: uppercase;
+  font-weight: 600; margin-bottom: 20px;
+}
+.hero-badge span { width: 6px; height: 6px; background: var(--accent); border-radius: 50%; animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
+.hero h1 {
+  font-size: clamp(2.2rem, 5vw, 3.8rem);
+  font-weight: 800;
+  letter-spacing: -1.5px;
+  line-height: 1.1;
+  margin-bottom: 16px;
+}
+.hero h1 .hl { color: var(--accent); }
+.hero h1 .hl2 { color: var(--accent2); }
+.hero p { color: var(--dim); font-size: 1.05rem; max-width: 600px; margin-bottom: 32px; }
+.hero-tags { display: flex; flex-wrap: wrap; gap: 8px; }
+.tag {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.72rem; padding: 4px 12px;
+  border-radius: 4px; font-weight: 500;
+}
+.tag-blue { background: rgba(56,189,248,0.1); color: var(--accent); border: 1px solid rgba(56,189,248,0.2); }
+.tag-purple { background: rgba(129,140,248,0.1); color: var(--accent2); border: 1px solid rgba(129,140,248,0.2); }
+.tag-green { background: rgba(52,211,153,0.1); color: var(--accent3); border: 1px solid rgba(52,211,153,0.2); }
+.tag-orange { background: rgba(251,146,60,0.1); color: var(--accent4); border: 1px solid rgba(251,146,60,0.2); }
+.tag-pink { background: rgba(244,114,182,0.1); color: var(--accent5); border: 1px solid rgba(244,114,182,0.2); }
+
+/* ── LAYOUT ── */
+.layout { display: flex; max-width: 1100px; margin: 0 auto; padding: 40px 24px; gap: 32px; }
+
+/* ── SIDEBAR ── */
+.sidebar {
+  width: 230px; flex-shrink: 0;
+  position: sticky; top: 24px;
+  height: fit-content;
+  max-height: calc(100vh - 48px);
+  overflow-y: auto;
+}
+.sidebar-title {
+  font-size: 0.65rem; letter-spacing: 3px; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 12px; padding: 0 4px;
+}
+.nav-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 12px; border-radius: 6px;
+  text-decoration: none; color: var(--dim);
+  font-size: 0.82rem; font-weight: 500;
+  transition: all 0.2s; cursor: pointer; border: none; background: none;
+  width: 100%; text-align: left; margin-bottom: 2px;
+}
+.nav-item:hover, .nav-item.active {
+  background: rgba(56,189,248,0.08); color: var(--accent);
+}
+.nav-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+
+/* ── MAIN CONTENT ── */
+.main { flex: 1; min-width: 0; }
+
+/* ── SECTION ── */
+.section {
+  margin-bottom: 60px;
+  animation: fadeUp 0.4s ease both;
+}
+@keyframes fadeUp { from{opacity:0;transform:translateY(16px);} to{opacity:1;transform:translateY(0);} }
+
+.section-header {
+  display: flex; align-items: center; gap: 16px;
+  margin-bottom: 28px; padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+.section-icon {
+  width: 44px; height: 44px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.3rem; flex-shrink: 0;
+}
+.section-header h2 { font-size: 1.4rem; font-weight: 700; letter-spacing: -0.5px; }
+.section-header p { font-size: 0.82rem; color: var(--dim); margin-top: 2px; }
+
+/* ── ANALOGY CARD ── */
+.analogy {
+  background: linear-gradient(135deg, rgba(56,189,248,0.06), rgba(129,140,248,0.06));
+  border: 1px solid rgba(56,189,248,0.18);
+  border-radius: 12px; padding: 20px 24px; margin-bottom: 20px;
+  position: relative; overflow: hidden;
+}
+.analogy::before {
+  content: '💡';
+  position: absolute; right: 20px; top: 16px; font-size: 1.5rem; opacity: 0.3;
+}
+.analogy-label {
+  font-size: 0.65rem; letter-spacing: 2px; text-transform: uppercase;
+  color: var(--accent); font-weight: 700; margin-bottom: 8px;
+}
+.analogy .row { display: flex; gap: 20px; flex-wrap: wrap; margin-top: 10px; }
+.analogy-box {
+  flex: 1; min-width: 200px; padding: 12px 16px;
+  background: rgba(0,0,0,0.25); border-radius: 8px;
+  border: 1px solid var(--border);
+}
+.analogy-box .label { font-size: 0.65rem; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 4px; }
+.analogy-box p { font-size: 0.85rem; color: var(--dim); }
+.analogy-box strong { color: var(--text); }
+
+/* ── STEP CARDS ── */
+.steps { display: flex; flex-direction: column; gap: 16px; }
+.step {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px; padding: 20px 24px;
+  position: relative;
+  transition: border-color 0.2s;
+}
+.step:hover { border-color: var(--border2); }
+.step-num {
+  position: absolute; top: 18px; right: 20px;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.65rem; color: var(--muted);
+  background: var(--surface2); padding: 2px 8px; border-radius: 4px;
+}
+.step h3 { font-size: 0.95rem; font-weight: 700; margin-bottom: 8px; }
+.step p { font-size: 0.85rem; color: var(--dim); line-height: 1.65; }
+.step ul { margin: 8px 0 0 0; padding-left: 0; list-style: none; }
+.step ul li {
+  font-size: 0.83rem; color: var(--dim);
+  padding: 3px 0 3px 18px; position: relative;
+}
+.step ul li::before { content: '→'; position: absolute; left: 0; color: var(--muted); }
+
+/* ── CODE BLOCKS ── */
+.code-wrap { margin: 14px 0; border-radius: 10px; overflow: hidden; }
+.code-header {
+  display: flex; align-items: center; justify-content: space-between;
+  background: #0d1117; padding: 8px 16px;
+  border-bottom: 1px solid #1e2836;
+}
+.code-filename {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.72rem; color: var(--dim);
+  display: flex; align-items: center; gap: 6px;
+}
+.code-dot { width: 10px; height: 10px; border-radius: 50%; }
+.copy-btn {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.65rem; color: var(--muted);
+  background: rgba(255,255,255,0.05); border: 1px solid var(--border);
+  padding: 3px 10px; border-radius: 4px; cursor: pointer;
+  transition: all 0.2s;
+}
+.copy-btn:hover { color: var(--accent); border-color: var(--accent); }
+pre {
+  background: var(--code-bg);
+  padding: 18px 20px; overflow-x: auto;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.82rem; line-height: 1.7;
+  margin: 0;
+}
+.kw { color: #ff79c6; }
+.str { color: #f1fa8c; }
+.cmt { color: #6272a4; font-style: italic; }
+.fn { color: #50fa7b; }
+.num { color: #bd93f9; }
+.prop { color: #8be9fd; }
+.op { color: #ff79c6; }
+.val { color: #ffb86c; }
+.tag-c { color: #ff79c6; }
+.attr { color: #50fa7b; }
+.plain { color: #f8f8f2; }
+
+/* ── COMPARISON ── */
+.compare { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0; }
+.compare-card {
+  border-radius: 10px; overflow: hidden;
+  border: 1px solid var(--border);
+}
+.compare-head {
+  padding: 10px 16px; font-size: 0.78rem; font-weight: 700;
+  letter-spacing: 0.5px;
+}
+.compare-body { padding: 14px 16px; background: var(--surface); }
+.compare-body p { font-size: 0.82rem; color: var(--dim); line-height: 1.6; margin-bottom: 6px; }
+.compare-body p:last-child { margin-bottom: 0; }
+.pro::before { content: '✓ '; color: var(--accent3); }
+.con::before { content: '✗ '; color: var(--red); }
+
+/* ── FLOW DIAGRAM ── */
+.flow-diagram {
+  display: flex; align-items: center; flex-wrap: wrap;
+  gap: 0; margin: 16px 0;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 12px; padding: 20px; overflow-x: auto;
+}
+.flow-box {
+  display: flex; flex-direction: column; align-items: center;
+  background: var(--surface2); border: 1px solid var(--border2);
+  border-radius: 8px; padding: 12px 16px; min-width: 100px;
+  text-align: center;
+}
+.flow-box .fb-label { font-size: 0.6rem; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 4px; }
+.flow-box .fb-name { font-family: 'Fira Code', monospace; font-size: 0.78rem; color: var(--accent); font-weight: 600; }
+.flow-box .fb-desc { font-size: 0.7rem; color: var(--dim); margin-top: 4px; }
+.flow-arrow { color: var(--muted); font-size: 1.2rem; padding: 0 8px; flex-shrink: 0; }
+
+/* ── INFO BOX ── */
+.infobox {
+  border-radius: 10px; padding: 16px 20px; margin: 14px 0;
+  font-size: 0.84rem; line-height: 1.65;
+  display: flex; gap: 14px; align-items: flex-start;
+}
+.infobox-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: 1px; }
+.infobox.info { background: rgba(56,189,248,0.07); border: 1px solid rgba(56,189,248,0.2); color: var(--dim); }
+.infobox.warn { background: rgba(251,191,36,0.07); border: 1px solid rgba(251,191,36,0.2); color: var(--dim); }
+.infobox.success { background: rgba(52,211,153,0.07); border: 1px solid rgba(52,211,153,0.2); color: var(--dim); }
+.infobox.danger { background: rgba(248,113,113,0.07); border: 1px solid rgba(248,113,113,0.2); color: var(--dim); }
+.infobox strong { color: var(--text); }
+
+/* ── MODULE CARDS ── */
+.module-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; margin: 16px 0; }
+.module-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 10px; padding: 18px 16px; position: relative; overflow: hidden;
+}
+.module-card::after {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 3px;
+}
+.mc-blue::after { background: var(--accent); }
+.mc-purple::after { background: var(--accent2); }
+.mc-green::after { background: var(--accent3); }
+.module-card .mc-num {
+  font-family: 'Fira Code', monospace;
+  font-size: 2.5rem; color: var(--border2);
+  font-weight: 700; position: absolute;
+  right: 12px; top: 8px; line-height: 1;
+}
+.module-card .mc-tag {
+  font-size: 0.62rem; letter-spacing: 2px; text-transform: uppercase;
+  font-weight: 700; margin-bottom: 6px;
+}
+.mc-blue .mc-tag { color: var(--accent); }
+.mc-purple .mc-tag { color: var(--accent2); }
+.mc-green .mc-tag { color: var(--accent3); }
+.module-card h3 { font-family: 'Fira Code', monospace; font-size: 0.85rem; margin-bottom: 8px; }
+.mc-blue h3 { color: var(--accent); }
+.mc-purple h3 { color: var(--accent2); }
+.mc-green h3 { color: var(--accent3); }
+.module-card p { font-size: 0.78rem; color: var(--dim); line-height: 1.6; }
+.module-card .mc-role {
+  display: inline-block; margin-top: 10px;
+  font-size: 0.65rem; font-weight: 700; padding: 2px 8px;
+  border-radius: 3px; font-family: 'Fira Code', monospace;
+}
+.mc-blue .mc-role { background: rgba(56,189,248,0.12); color: var(--accent); border: 1px solid rgba(56,189,248,0.25); }
+.mc-purple .mc-role { background: rgba(129,140,248,0.12); color: var(--accent2); border: 1px solid rgba(129,140,248,0.25); }
+.mc-green .mc-role { background: rgba(52,211,153,0.12); color: var(--accent3); border: 1px solid rgba(52,211,153,0.25); }
+
+/* ── BEHAVIOR TABLE ── */
+.btable { width: 100%; border-collapse: collapse; margin: 14px 0; border-radius: 10px; overflow: hidden; }
+.btable th { background: var(--surface2); padding: 10px 16px; font-size: 0.72rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1.5px; text-align: left; border-bottom: 1px solid var(--border); }
+.btable td { padding: 10px 16px; font-size: 0.83rem; border-bottom: 1px solid #111827; vertical-align: middle; }
+.btable tr:last-child td { border-bottom: none; }
+.btable tr:nth-child(even) td { background: rgba(255,255,255,0.01); }
+.btable .code { font-family: 'Fira Code', monospace; font-size: 0.78rem; color: var(--accent3); }
+.btable .highlight { color: var(--accent); font-weight: 600; }
+
+/* ── TOC HIGHLIGHT / DIVIDERS ── */
+.section-divider {
+  display: flex; align-items: center; gap: 12px;
+  margin: 40px 0 28px;
+}
+.section-divider .div-line { flex: 1; height: 1px; background: var(--border); }
+.section-divider .div-label {
+  font-size: 0.65rem; letter-spacing: 3px; text-transform: uppercase;
+  color: var(--muted); white-space: nowrap;
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 768px) {
+  .layout { flex-direction: column; padding: 20px 16px; }
+  .sidebar { width: 100%; position: static; }
+  .module-grid { grid-template-columns: 1fr; }
+  .compare { grid-template-columns: 1fr; }
+  .hero { padding: 40px 20px 36px; }
+}
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-inner">
+    <div class="hero-badge"><span></span> Step-by-Step Notes</div>
+    <h1>Webpack &amp; <span class="hl">Babel</span><br>The <span class="hl2">Complete</span> Guide</h1>
+    <p>From transpiling ES6 with Babel to CSS loaders, image handling, code splitting, and production deployment — beginner-friendly with real-world analogies.</p>
+    <div class="hero-tags">
+      <span class="tag tag-blue">babel-loader</span>
+      <span class="tag tag-purple">@babel/core</span>
+      <span class="tag tag-green">preset-env</span>
+      <span class="tag tag-orange">css-loader</span>
+      <span class="tag tag-pink">code splitting</span>
+      <span class="tag tag-blue">webpack-dev-server</span>
+      <span class="tag tag-green">deployment</span>
+    </div>
+  </div>
+</div>
+
+<div class="layout">
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-title">Contents</div>
+  <a class="nav-item" href="#s1"><span class="nav-dot" style="background:#38bdf8"></span>Babel Introduction</a>
+  <a class="nav-item" href="#s2"><span class="nav-dot" style="background:#818cf8"></span>Core Module Packages</a>
+  <a class="nav-item" href="#s3"><span class="nav-dot" style="background:#34d399"></span>.babelrc Config</a>
+  <a class="nav-item" href="#s4"><span class="nav-dot" style="background:#fb923c"></span>CSS Loader — Method 1</a>
+  <a class="nav-item" href="#s5"><span class="nav-dot" style="background:#f472b6"></span>CSS Loader — Method 2</a>
+  <a class="nav-item" href="#s6"><span class="nav-dot" style="background:#fbbf24"></span>Method 1 vs Method 2</a>
+  <a class="nav-item" href="#s7"><span class="nav-dot" style="background:#38bdf8"></span>Image Loader</a>
+  <a class="nav-item" href="#s8"><span class="nav-dot" style="background:#818cf8"></span>Code Splitting</a>
+  <a class="nav-item" href="#s9"><span class="nav-dot" style="background:#34d399"></span>Webpack Dev Server</a>
+  <a class="nav-item" href="#s10"><span class="nav-dot" style="background:#fb923c"></span>React Code Splitting</a>
+  <a class="nav-item" href="#s11"><span class="nav-dot" style="background:#f472b6"></span>Static Deployment</a>
+  <a class="nav-item" href="#s12"><span class="nav-dot" style="background:#34d399"></span>package.json for Jira</a>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+
+<!-- ══════════════════════════════════════════ -->
+<!-- SECTION 1: BABEL INTRO -->
+<!-- ══════════════════════════════════════════ -->
+<section class="section" id="s1">
+  <div class="section-header">
+    <div class="section-icon" style="background:rgba(56,189,248,0.12);border:1px solid rgba(56,189,248,0.2)">⚡</div>
+    <div>
+      <h2 style="color:var(--accent)">1. Babel Introduction</h2>
+      <p>What is Babel and why do we need it?</p>
+    </div>
+  </div>
+
+  <div class="analogy">
+    <div class="analogy-label">Real-world analogy</div>
+    <p style="font-size:0.88rem;color:var(--dim)">Think of Babel like a <strong style="color:var(--text)">language translator</strong> between countries.</p>
+    <div class="row">
+      <div class="analogy-box">
+        <div class="label">Everyday Analogy</div>
+        <p>You write a letter in modern English (ES6). Babel <strong>translates</strong> it to a simpler form that old readers (old browsers) can understand (ES5).</p>
+      </div>
+      <div class="analogy-box">
+        <div class="label">Tech Analogy</div>
+        <p>You write JavaScript using modern syntax like <strong>const</strong>, <strong>arrow functions</strong>, and <strong>classes</strong>. Babel converts them to plain old <strong>var</strong> and <strong>function()</strong> that every browser understands.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="steps">
+    <div class="step">
+      <span class="step-num">concept</span>
+      <h3 style="color:var(--accent)">What is Babel?</h3>
+      <p>Babel is a JavaScript transpiler — it takes modern JavaScript (ES6/ES2015+) and converts it into older JavaScript (ES5) that older browsers can run. It has <strong>several dozen</strong> individual libraries, but we need just 3 core ones.</p>
+    </div>
+    <div class="step">
+      <span class="step-num">why</span>
+      <h3 style="color:var(--accent)">Why do we need it?</h3>
+      <p>Not all browsers support modern JavaScript features. By running code through Babel, your app works everywhere — from the latest Chrome to older browsers.</p>
+      <ul>
+        <li>Converts <code style="color:var(--accent3)">const</code> / <code style="color:var(--accent3)">let</code> → <code style="color:var(--accent3)">var</code></li>
+        <li>Converts arrow functions → regular functions</li>
+        <li>Converts ES6 classes → prototype-based code</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="code-wrap">
+    <div class="code-header">
+      <div class="code-filename"><div class="code-dot" style="background:#ff5f57"></div><div class="code-dot" style="background:#febc2e"></div><div class="code-dot" style="background:#28c840"></div>&nbsp; Install command</div>
+      <button class="copy-btn" onclick="copyCode(this)">copy</button>
+    </div>
+    <pre><span class="cmt"># Install all 3 Babel modules at once</span>
+<span class="fn">npm</span> install <span class="val">--save-dev</span> <span class="str">babel-loader</span> <span class="str">@babel/core</span> <span class="str">@babel/preset-env</span></pre>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════ -->
+<!-- SECTION 2: CORE PACKAGES -->
+<!-- ══════════════════════════════════════════ -->
+<section class="section" id="s2">
+  <div class="section-header">
+    <div class="section-icon" style="background:rgba(129,140,248,0.12);border:1px solid rgba(129,140,248,0.2)">📦</div>
+    <div>
+      <h2 style="color:var(--accent2)">2. Core Module Packages</h2>
+      <p>The 3 pieces that form Babel's puzzle</p>
+    </div>
+  </div>
+
+  <div class="analogy">
+    <div class="analogy-label">Real-world analogy</div>
+    <p style="font-size:0.88rem;color:var(--dim)">Think of it like a <strong style="color:var(--text)">restaurant kitchen</strong>:</p>
+    <div class="row">
+      <div class="analogy-box">
+        <div class="label">babel-loader</div>
+        <p>The <strong>waiter</strong> — takes food orders (files) from the dining room (Webpack) and brings them to the kitchen (Babel).</p>
+      </div>
+      <div class="analogy-box">
+        <div class="label">@babel/core</div>
+        <p>The <strong>kitchen itself</strong> — receives the order and is ready to cook, but has no recipes yet. It needs a cookbook.</p>
+      </div>
+      <div class="analogy-box">
+        <div class="label">preset-env</div>
+        <p>The <strong>recipe book</strong> — tells the kitchen exactly how to transform each ingredient (ES6 syntax) into the final dish (ES5 code).</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="module-grid">
+    <div class="module-card mc-blue">
+      <div class="mc-num">01</div>
+      <div class="mc-tag">Compatibility Layer</div>
+      <h3>babel-loader</h3>
+      <p>Teaches Babel how to work with Webpack specifically. Babel supports 12+ build systems — this module is the bridge for Webpack.</p>
+      <span class="mc-role">Webpack Bridge</span>
+    </div>
+    <div class="module-card mc-purple">
+      <div class="mc-num">02</div>
+      <div class="mc-tag">The Heart</div>
+      <h3>@babel/core</h3>
+      <p>The core engine. Takes input code and produces output files. <strong>Secret:</strong> by itself, it does absolutely nothing — no transformation at all.</p>
+      <span class="mc-role">Pipeline Engine</span>
+    </div>
+    <div class="module-card mc-green">
+      <div class="mc-num">03</div>
+      <div class="mc-tag">The Brains</div>
+      <h3>@babel/preset-env</h3>
+      <p>Contains dozens of rules telling Babel exactly how to transform ES6 code. This is where the real transformation magic lives.</p>
+      <span class="mc-role">Rule Engine</span>
+    </div>
+  </div>
+
+  <div class="infobox warn">
+    <span class="infobox-icon">⚠️</span>
+    <div><strong>Key Insight:</strong> <code>@babel/core</code> by itself has zero ability to transform your code. It's just a pipeline. The actual rules for transforming ES6 → ES5 come entirely from <code>@babel/preset-env</code>.</div>
+  </div>
+
+  <div class="flow-diagram">
+    <div class="flow-box">
+      <div class="fb-label">your code</div>
+      <div class="fb-name">ES6 File</div>
+      <div class="fb-desc">const, =>, class</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box">
+      <div class="fb-label">layer 1</div>
+      <div class="fb-name">babel-loader</div>
+      <div class="fb-desc">Webpack bridge</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box">
+      <div class="fb-label">layer 2</div>
+      <div class="fb-name">@babel/core</div>
+      <div class="fb-desc">Pipeline runner</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box">
+      <div class="fb-label">layer 3</div>
+      <div class="fb-name">preset-env</div>
+      <div class="fb-desc">Applies rules</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box">
+      <div class="fb-label">output</div>
+      <div class="fb-name">ES5 Bundle</div>
+      <div class="fb-desc">var, function(){}</div>
+    </div>
+  </div>
+
+  <!-- Webpack config for babel-loader -->
+  <div class="code-wrap">
+    <div class="code-header">
+      <div class="code-filename"><div class="code-dot" style="background:#ff5f57"></div><div class="code-dot" style="background:#febc2e"></div><div class="code-dot" style="background:#28c840"></div>&nbsp; webpack.config.js</div>
+      <button class="copy-btn" onclick="copyCode(this)">copy</button>
+    </div>
+    <pre><span class="kw">module</span>.<span class="prop">exports</span> = {
+  <span class="prop">module</span>: {
+    <span class="prop">rules</span>: [
+      {
+        <span class="cmt">// Apply babel to every .js file</span>
+        <span class="prop">test</span>: <span class="val">/\.js$/</span>,      <span class="cmt">// regex: files ending in .js</span>
+        <span class="prop">use</span>: <span class="str">'babel-loader'</span>
+      }
+    ]
+  }
+};</pre>
+  </div>
+
+  <div class="infobox info">
+    <span class="infobox-icon">ℹ️</span>
+    <div><strong>The <code>test</code> property</strong> is a regex applied to every file Webpack imports. The regex <code>/\.js$/</code> means: "only apply this loader to files whose name ends with <code>.js</code>". CSS files, images, and other files won't be touched by Babel.</div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════ -->
+<!-- SECTION 3: BABELRC -->
+<!-- ══════════════════════════════════════════ -->
+<section class="section" id="s3">
+  <div class="section-header">
+    <div class="section-icon" style="background:rgba(52,211,153,0.12);border:1px solid rgba(52,211,153,0.2)">📄</div>
+    <div>
+      <h2 style="color:var(--accent3)">3. .babelrc Configuration File</h2>
+      <p>Telling Babel what rules to follow</p>
+    </div>
+  </div>
+
+  <div class="analogy">
+    <div class="analogy-label">Real-world analogy</div>
+    <p style="font-size:0.88rem;color:var(--dim)">Think of <strong style="color:var(--text)">.babelrc</strong> like an <strong style="color:var(--text)">instruction manual</strong> left on your desk. When Babel loads up, it looks for this file and reads: "Ah, I'm supposed to use the <code>preset-env</code> ruleset today."</p>
+  </div>
+
+  <div class="steps">
+    <div class="step">
+      <span class="step-num">step 1</span>
+      <h3 style="color:var(--accent3)">Create the file</h3>
+      <p>Create a file in your project root called <code style="color:var(--accent3)">.babelrc</code> — note: no file extension, just the dot and the name.</p>
+    </div>
+  </div>
+
+  <div class="code-wrap">
+    <div class="code-header">
+      <div class="code-filename"><div class="code-dot" style="background:#ff5f57"></div><div class="code-dot" style="background:#febc2e"></div><div class="code-dot" style="background:#28c840"></div>&nbsp; .babelrc</div>
+      <button class="copy-btn" onclick="copyCode(this)">copy</button>
+    </div>
+    <pre>{
+  <span class="prop">"presets"</span>: [<span class="str">"@babel/preset-env"</span>]
+}</pre>
+  </div>
+
+  <div class="infobox success">
+    <span class="infobox-icon">✅</span>
+    <div>When Babel runs, it automatically finds <code>.babelrc</code>, sees it should use <code>@babel/preset-env</code>, loads that module, and applies all its ES6→ES5 transformation rules across all your JavaScript files.</div>
+  </div>
+
+  <div class="step" style="margin-top:14px">
+    <span class="step-num">verify</span>
+    <h3 style="color:var(--accent3)">How to verify it worked</h3>
+    <p>After running <code>npm run build</code>, open <code>bundle.js</code> and search for your function. If Babel worked correctly:</p>
+    <ul>
+      <li><code>const</code> and <code>let</code> will be replaced with <code>var</code></li>
+      <li>Arrow functions <code>() =&gt; {}</code> will be replaced with <code>function() {}</code></li>
+      <li>No ES6 class syntax visible</li>
+    </ul>
+  </div>
+
+  <div class="code-wrap">
+    <div class="code-header">
+      <div class="code-filename"><div class="code-dot" style="background:#ff5f57"></div><div class="code-dot" style="background:#febc2e"></div><div class="code-dot" style="background:#28c840"></div>&nbsp; Before → After transformation</div>
+      <button class="copy-btn" onclick="copyCode(this)">copy</button>
+    </div>
+    <pre><span class="cmt">// BEFORE (your code — ES6)</span>
+<span class="kw">const</span> <span class="fn">add</span> = (<span class="prop">a</span>, <span class="prop">b</span>) <span class="op">=&gt;</span> a + b;
+
+<span class="cmt">// AFTER (babel output — ES5)</span>
+<span class="kw">var</span> <span class="fn">add</span> = <span class="kw">function</span>(<span class="prop">a</span>, <span class="prop">b</span>) { <span class="kw">return</span> a + b; };</pre>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════ -->
+<!-- SECTION 4: CSS LOADER METHOD 1 -->
+<!-- ══════════════════════════════════════════ -->
+<section class="section" id="s4">
+  <div class="section-header">
+    <div class="section-icon" style="background:rgba(251,146,60,0.12);border:1px solid rgba(251,146,60,0.2)">🎨</div>
+    <div>
+      <h2 style="color:var(--accent4)">4. CSS Loader — Method 1 (Inject into &lt;style&gt;)</h2>
+      <p>css-loader + style-loader: inject CSS into the DOM</p>
+    </div>
+  </div>
+
+  <div class="analogy">
+    <div class="analogy-label">Real-world analogy</div>
+    <p style="font-size:0.88rem;color:var(--dim)">Method 1 is like a <strong style="color:var(--text)">chef who cooks the sauce directly into the dish</strong>. The CSS ends up mixed into your JavaScript bundle, and JavaScript injects it into the page at runtime.</p>
+  </div>
+
+  <div class="steps">
+    <div class="step">
+      <span class="step-num">step 1</span>
+      <h3 style="color:var(--accent4)">Install the two loaders</h3>
+      <div class="code-wrap">
+        <div class="code-header">
+          <div class="code-filename">terminal</div>
+          <button class="copy-btn" onclick="copyCode(this)">copy</button>
+        </div>
+        <pre><span class="fn">npm</span> install <span class="val">--save-dev</span> <span class="str">style-loader</span> <span class="str">css-loader</span></pre>
+      </div>
+    </div>
+    <div class="step">
+      <span class="step-num">step 2</span>
+      <h3 style="color:var(--accent4)">Add the CSS rule to webpack.config.js</h3>
+      <div class="code-wrap">
+        <div class="code-header">
+          <div class="code-filename">webpack.config.js</div>
+          <button class="copy-btn" onclick="copyCode(this)">copy</button>
+        </div>
+        <pre><span class="kw">module</span>.<span class="prop">exports</span> = {
+  <span class="prop">module</span>: {
+    <span class="prop">rules</span>: [
+      {
+        <span class="prop">test</span>: <span class="val">/\.css$/</span>,
+        <span class="cmt">// ⚠️ Order matters! Right to left execution:</span>
+        <span class="cmt">// 1. css-loader runs first  (reads CSS file)</span>
+        <span class="cmt">// 2. style-loader runs second (injects into DOM)</span>
+        <span class="prop">use</span>: [<span class="str">'style-loader'</span>, <span class="str">'css-loader'</span>]
+      }
+    ]
+  }
+};</pre>
+      </div>
+    </div>
+    <div class="step">
+      <span class="step-num">step 3</span>
+      <h3 style="color:var(--accent4)">Import CSS in your JavaScript file</h3>
+      <div class="code-wrap">
+        <div class="code-header">
+          <div class="code-filename">image_viewer.js</div>
+          <button class="copy-btn" onclick="copyCode(this)">copy</button>
+        </div>
+        <pre><span class="cmt">// Import CSS into your JS file (non-JS imports need file extension!)</span>
+<span class="kw">import</span> <span class="str">'../styles/image_viewer.css'</span>;
+<span class="cmt">// Note: no variable assignment needed — just importing is enough</span></pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="infobox info">
+    <span class="infobox-icon">🔍</span>
+    <div><strong>What happens under the hood:</strong><br>
+    1. <strong>css-loader</strong> reads the CSS file and converts its contents into a JavaScript string inside <code>bundle.js</code><br>
+    2. <strong>style-loader</strong> adds code to <code>bundle.js</code> that, when executed in the browser, creates a <code>&lt;style&gt;</code> tag and injects the CSS string into the <code>&lt;head&gt;</code></div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════ -->
+<!-- SECTION 5: CSS LOADER METHOD 2 -->
+<!-- ══════════════════════════════════════════ -->
+<section class="section" id="s5">
+  <div class="section-header">
+    <div class="section-icon" style="background:rgba(244,114,182,0.12);border:1px solid rgba(244,114,182,0.2)">📁</div>
+    <div>
+      <h2 style="color:var(--accent5)">5. CSS Loader — Method 2 (Separate CSS File)</h2>
+      <p>mini-css-extract-plugin: output a standalone style.css (Webpack 5 modern approach)</p>
+    </div>
+  </div>
+
+  <div class="analogy">
+    <div class="analogy-label">Real-world analogy</div>
+    <p style="font-size:0.88rem;color:var(--dim)">Method 2 is like a <strong style="color:var(--text)">chef who plates the sauce separately</strong>. Your CSS ends up in its own <code>style.css</code> file, separate from the JavaScript bundle.</p>
+  </div>
+
+  <div class="infobox danger">
+    <span class="infobox-icon">🚨</span>
+    <div><strong>extract-text-webpack-plugin is dead for Webpack 5!</strong> It only supports Webpack 1–3. Installing it on Webpack 5 throws an <code>ERESOLVE</code> peer dependency error. Use <strong>mini-css-extract-plugin</strong> instead — the official modern replacement.</div>
+  </div>
+
+  <table class="btable" style="margin-bottom:16px">
+    <thead>
+      <tr><th>Plugin</th><th>Webpack Support</th><th>Status</th></tr>
+    </thead>
+    <tbody>
+      <tr><td class="code">extract-text-webpack-plugin</td><td>Webpack 1–3 only</td><td style="color:var(--red)">❌ Abandoned</td></tr>
+      <tr><td class="code">mini-css-extract-plugin</td><td>Webpack 4 &amp; 5</td><td style="color:var(--accent3)">✅ Use this</td></tr>
+      <tr><td class="code">css-minimizer-webpack-plugin</td><td>Webpack 4 &amp; 5</td><td style="color:var(--accent)">➕ Optional: minifies CSS</td></tr>
+    </tbody>
+  </table>
+
+  <div class="steps">
+    <div class="step">
+      <span class="step-num">step 1</span>
+      <h3 style="color:var(--accent5)">Install mini-css-extract-plugin</h3>
+      <div class="code-wrap">
+        <div class="code-header">
+          <div class="code-filename">terminal</div>
+          <button class="copy-btn" onclick="copyCode(this)">copy</button>
+        </div>
+        <pre><span class="cmt"># Core plugin — extracts CSS to a separate file</span>
+<span class="fn">npm</span> install <span class="val">--save-dev</span> <span class="str">mini-css-extract-plugin</span>
+
+<span class="cmt"># Optional — also minifies the extracted CSS in production</span>
+<span class="fn">npm</span> install <span class="val">--save-dev</span> <span class="str">css-minimizer-webpack-plugin</span></pre>
+      </div>
+    </div>
+    <div class="step">
+      <span class="step-num">step 2</span>
+      <h3 style="color:var(--accent5)">Update webpack.config.js</h3>
+      <div class="code-wrap">
+        <div class="code-header">
+          <div class="code-filename">webpack.config.js</div>
+          <button class="copy-btn" onclick="copyCode(this)">copy</button>
+        </div>
+        <pre><span class="kw">const</span> <span class="prop">MiniCssExtractPlugin</span> = <span class="fn">require</span>(<span class="str">'mini-css-extract-plugin'</span>);
+<span class="kw">const</span> <span class="prop">CssMinimizerPlugin</span> = <span class="fn">require</span>(<span class="str">'css-minimizer-webpack-plugin'</span>); <span class="cmt">// optional</span>
+
+<span class="kw">module</span>.<span class="prop">exports</span> = {
+  <span class="prop">module</span>: {
+    <span class="prop">rules</span>: [
+      {
+        <span class="prop">test</span>: <span class="val">/\.css$/</span>,
+        <span class="prop">use</span>: [
+          <span class="cmt">// MiniCssExtractPlugin.loader replaces 'style-loader'</span>
+          <span class="prop">MiniCssExtractPlugin</span>.<span class="prop">loader</span>,
+          <span class="str">'css-loader'</span>
+        ]
+      }
+    ]
+  },
+  <span class="prop">plugins</span>: [
+    <span class="kw">new</span> <span class="fn">MiniCssExtractPlugin</span>({
+      <span class="prop">filename</span>: <span class="str">'style.css'</span>  <span class="cmt">// output filename</span>
+    })
+  ],
+  <span class="cmt">// Optional: minify the CSS output in production</span>
+  <span class="prop">optimization</span>: {
+    <span class="prop">minimizer</span>: [
+      <span class="str">'...'</span>,  <span class="cmt">// keeps Webpack's default JS minifier</span>
+      <span class="kw">new</span> <span class="fn">CssMinimizerPlugin</span>()
+    ]
+  }
+};</pre>
+      </div>
+    </div>
+    <div class="step">
+      <span class="step-num">step 3</span>
+      <h3 style="color:var(--accent5)">Link the CSS file in your HTML</h3>
+      <div class="code-wrap">
+        <div class="code-header">
+          <div class="code-filename">index.html</div>
+          <button class="copy-btn" onclick="copyCode(this)">copy</button>
+        </div>
+        <pre><span class="tag-c">&lt;link</span> <span class="attr">rel</span>=<span class="str">"stylesheet"</span> <span class="attr">href</span>=<span class="str">"build/style.css"</span><span class="tag-c">&gt;</span></pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="infobox info">
+    <span class="infobox-icon">🔍</span>
+    <div><strong>Loaders vs Plugins in Webpack:</strong><br>
+    <strong>Loaders</strong> pre-process files before they enter the bundle.<br>
+    <strong>Plugins</strong> work outside the pipeline and can prevent files from entering the bundle entirely — which is how MiniCssExtractPlugin saves CSS to a separate file.<br><br>
+    <strong>css-minimizer-webpack-plugin</strong> is a separate concern — it doesn't extract CSS, it only <em>compresses</em> already-extracted CSS. Use it on top of MiniCssExtractPlugin for smaller production output.</div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════ -->
+<!-- SECTION 6: METHOD 1 VS METHOD 2 -->
+<!-- ══════════════════════════════════════════ -->
+<section class="section" id="s6">
+  <div class="section-header">
+    <div class="section-icon" style="background:rgba(251,191,36,0.12);border:1px solid rgba(251,191,36,0.2)">⚖️</div>
+    <div>
+      <h2 style="color:var(--yellow)">6. Method 1 vs Method 2</h2>
+      <p>Injected CSS vs Separate CSS file — which to choose?</p>
+    </div>
+  </div>
+
+  <div class="compare">
+    <div class="compare-card">
+      <div class="compare-head" style="background:rgba(251,146,60,0.12);color:var(--accent4)">Method 1 — style-loader (Injected)</div>
+      <div class="compare-body">
+        <p class="pro">Simple setup — just 2 loaders</p>
+        <p class="pro">Works automatically, no HTML changes needed</p>
+        <p class="pro">Great for component-scoped styles (React)</p>
+        <p class="con">CSS loaded via JavaScript — slower initial render</p>
+        <p class="con">CSS lives inside bundle.js — harder to cache separately</p>
+        <p class="con">Violates traditional CSS file expectations</p>
+      </div>
+    </div>
+    <div class="compare-card">
+      <div class="compare-head" style="background:rgba(244,114,182,0.12);color:var(--accent5)">Method 2 — MiniCssExtractPlugin (Separate file)</div>
+      <div class="compare-body">
+        <p class="pro">Browser downloads CSS and JS in <strong>parallel</strong> — faster</p>
+        <p class="pro">Separate file can be cached independently</p>
+        <p class="pro">Follows traditional web conventions</p>
+        <p class="con">Requires extra plugin and HTML link tag</p>
+        <p class="con">Slightly more complex configuration</p>
+        <p class="con">All CSS merged into one file (no component isolation)</p>
+      </div>
+    </div>
+  </div>
+
+  <table class="btable">
+    <thead>
+      <tr><th>Aspect</th><th>Method 1 (style-loader)</th><th>Method 2 (MiniCssExtractPlugin)</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Output</td><td class="code">injected &lt;style&gt; tag</td><td class="code">style.css file</td></tr>
+      <tr><td>Load speed</td><td>Slower (JS parses first)</td><td class="highlight">Faster (parallel download)</td></tr>
+      <tr><td>Caching</td><td>Tied to bundle.js</td><td class="highlight">Separate cache</td></tr>
+      <tr><td>Best for</td><td>Dev / React components</td><td class="highlight">Production builds</td></tr>
+      <tr><td>HTML change needed?</td><td>❌ No</td><td>✅ Add &lt;link&gt; tag</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ══════════════════════════════════════════ -->
+<!-- SECTION 7: IMAGE LOADER -->
+<!-- ══════════════════════════════════════════ -->
+<section class="section" id="s7">
+  <div class="section-header">
+    <div class="section-icon" style="background:rgba(56,189,248,0.12);border:1px solid rgba(56,189,248,0.2)">🖼️</div>
+    <div>
+      <h2 style="color:var(--accent)">7. Image Loader</h2>
+      <p>url-loader + image-webpack-loader: smart image handling</p>
+    </div>
+  </div>
+
+  <div class="analogy">
+    <div class="analogy-label">Real-world analogy</div>
+    <p style="font-size:0.88rem;color:var(--dim)">Think of it like shipping packages. <strong style="color:var(--text)">Small packages</strong> (tiny images) get stuffed directly into the delivery truck (bundle.js). <strong style="color:var(--text)">Large packages</strong> are sent separately in their own truck.</p>
+  </div>
+
+  <div class="steps">
+    <div class="step">
+      <span class="step-num">step 1</span>
+      <h3 style="color:var(--accent)">Install both loaders</h3>
+      <div class="code-wrap">
+        <div class="code-header">
+          <div class="code-filename">terminal</div>
+          <button class="copy-btn" onclick="copyCode(this)">copy</button>
+        </div>
+        <pre><span class="fn">npm</span> install <span class="val">--save-dev</span> <span class="str">image-webpack-loader</span> <span class="str">url-loader</span></pre>
+      </div>
+    </div>
+    <div class="step">
+      <span class="step-num">step 2</span>
+      <h3 style="color:var(--accent)">Add image rule to webpack.config.js</h3>
+      <div class="code-wrap">
+        <div class="code-header">
+          <div class="code-filename">webpack.config.js</div>
+          <button class="copy-btn" onclick="copyCode(this)">copy</button>
+        </div>
+        <pre>{
+  <span class="cmt">// Match jpg, jpeg, png, gif, svg files</span>
+  <span class="prop">test</span>: <span class="val">/\.(jpe?g|png|gif|svg)$/</span>,
+  <span class="prop">use</span>: [
+    {
+      <span class="prop">loader</span>: <span class="str">'url-loader'</span>,
+      <span class="prop">options</span>: {
+        <span class="cmt">// 40000 bytes = 40KB threshold</span>
+        <span class="cmt">// &lt; 40KB  → embed as Base64 in bundle.js</span>
+        <span class="cmt">// &gt; 40KB  → save as separate file in build/</span>
+        <span class="prop">limit</span>: <span class="num">40000</span>
+      }
+    },
+    <span class="str">'image-webpack-loader'</span>  <span class="cmt">// runs FIRST (compresses image)</span>
+  ]
+}</pre>
+      </div>
+    </div>
+    <div class="step">
+      <span class="step-num">step 3</span>
+      <h3 style="color:var(--accent)">Import images in JavaScript</h3>
+      <div class="code-wrap">
+        <div class="code-header">
+          <div class="code-filename">image_viewer.js</div>
+          <button class="copy-btn" onclick="copyCode(this)">copy</button>
+        </div>
+        <pre><span class="kw">import</span> <span class="prop">big</span> <span class="kw">from</span> <span class="str">'../assets/big.jpg'</span>;    <span class="cmt">// &gt;40KB → separate file path</span>
+<span class="kw">import</span> <span class="prop">small</span> <span class="kw">from</span> <span class="str">'../assets/small.jpg'</span>;  <span class="cmt">// &lt;40KB → Base64 data string</span>
+
+<span class="kw">const</span> <span class="prop">img</span> = <span class="kw">new</span> <span class="fn">Image</span>();
+<span class="prop">img</span>.<span class="prop">src</span> = <span class="prop">small</span>;  <span class="cmt">// works as data URL</span>
+<span class="prop">img</span>.<span class="prop">src</span> = <span class="prop">big</span>;    <span class="cmt">// works as file path (needs publicPath fix!)</span></pre>
+      </div>
+    </div>
+    <div class="step">
+      <span class="step-num">step 4</span>
+      <h3 style="color:var(--accent)">Fix large image paths with publicPath</h3>
+      <p>Large images saved to the build folder need a <code>publicPath</code> prefix so the browser knows where to find them.</p>
+      <div class="code-wrap">
+        <div class="code-header">
+          <div class="code-filename">webpack.config.js — output section</div>
+          <button class="copy-btn" onclick="copyCode(this)">copy</button>
+        </div>
+        <pre><span class="prop">output</span>: {
+  <span class="prop">path</span>: <span class="prop">path</span>.<span class="fn">join</span>(__dirname, <span class="str">'build'</span>),
+  <span class="prop">filename</span>: <span class="str">'bundle.js'</span>,
+  <span class="cmt">// Prepend 'build/' to all file paths generated by loaders</span>
+  <span class="prop">publicPath</span>: <span class="str">'build/'</span>
+}</pre>
+      </div>
+    </div>
+  </div>
+
+  <table class="btable">
+    <thead>
+      <tr><th>Image size</th><th>What url-loader does</th><th>Result in code</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Small (&lt; 40KB)</td>
+        <td>Converts to Base64 string, embeds in bundle.js</td>
+        <td class="code">data:image/jpeg;base64,/9j/...</td>
+      </tr>
+      <tr>
+        <td>Large (&gt; 40KB)</td>
+        <td>Compresses and copies to build/ folder</td>
+        <td class="code">build/faa6a8f...jpg</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="infobox warn">
+    <span class="infobox-icon">⚠️</span>
+    <div><strong>Loader order matters!</strong> Loaders in the <code>use</code> array run <strong>right to left</strong>. So <code>image-webpack-loader</code> (listed second) runs <strong>first</strong> to compress the image, then <code>url-loader</code> (listed first) runs <strong>second</strong> to decide where to put it.</div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════ -->
+<!-- SECTION 8: CODE SPLITTING -->
+<!-- ══════════════════════════════════════════ -->
+<section class="section" id="s8">
+  <div class="section-header">
+    <div class="section-icon" style="background:rgba(129,140,248,0.12);border:1px solid rgba(129,140,248,0.2)">✂️</div>
+    <div>
+      <h2 style="color:var(--accent2)">8. Code Splitting</h2>
+      <p>Load JavaScript only when it's actually needed</p>
+    </div>
+  </div>
+
+  <div class="analogy">
+    <div class="analogy-label">Real-world analogy</div>
+    <p style="font-size:0.88rem;color:var(--dim)">Imagine a restaurant menu. Instead of preparing every dish when the restaurant opens, the kitchen only <strong style="color:var(--text)">starts cooking when a customer actually orders</strong>. Code splitting works the same way — only load the code users actually need, when they need it.</p>
+  </div>
+
+  <div class="steps">
+    <div class="step">
+      <span class="step-num">concept</span>
+      <h3 style="color:var(--accent2)">How it works</h3>
+      <p>Use <code>System.import()</code> (ES2015 dynamic import) to tell Webpack to split that module into its own separate bundle. Webpack automatically detects these calls during build and creates separate chunk files.</p>
+    </div>
+    <div class="step">
+      <span class="step-num">step 1</span>
+      <h3 style="color:var(--accent2)">Basic code splitting — load on button click</h3>
+      <div class="code-wrap">
+        <div class="code-header">
+          <div class="code-filename">index.js</div>
+          <button class="copy-btn" onclick="copyCode(this)">copy</button>
+        </div>
+        <pre><span class="kw">const</span> <span class="prop">button</span> = document.<span class="fn">createElement</span>(<span class="str">'button'</span>);
+<span class="prop">button</span>.<span class="prop">innerText</span> = <span class="str">'Click me'</span>;
+
+<span class="cmt">// onclick (lowercase!) - this is vanilla HTML, not React</span>
+<span class="prop">button</span>.<span class="prop">onclick</span> = () <span class="op">=&gt;</span> {
+  <span class="cmt">// System.import() returns a Promise</span>
+  <span class="cmt">// Webpack sees this and creates a separate chunk file</span>
+  <span class="fn">System</span>.<span class="fn">import</span>(<span class="str">'./image_viewer'</span>)
+    .<span class="fn">then</span>(<span class="prop">module</span> <span class="op">=&gt;</span> {
+      <span class="cmt">// module.default = the exported function/component</span>
+      <span class="prop">module</span>.<span class="prop">default</span>();
+    });
+};
+
+document.<span class="prop">body</span>.<span class="fn">appendChild</span>(<span class="prop">button</span>);</pre>
+      </div>
+    </div>
+    <div class="step">
+      <span class="step-num">step 2</span>
+      <h3 style="color:var(--accent2)">Export a function from the split module</h3>
+      <div class="code-wrap">
+        <div class="code-header">
+          <div class="code-filename">image_viewer.js</div>
+          <button class="copy-btn" onclick="copyCode(this)">copy</button>
+        </div>
+        <pre><span class="kw">import</span> <span class="prop">small</span> <span class="kw">from</span> <span class="str">'../assets/small.jpg'</span>;
+
+<span class="cmt">// Export a function instead of executing immediately</span>
+<span class="kw">export default</span> () <span class="op">=&gt;</span> {
+  <span class="kw">const</span> <span class="prop">image</span> = <span class="kw">new</span> <span class="fn">Image</span>();
+  <span class="prop">image</span>.<span class="prop">src</span> = <span class="prop">small</span>;
+  document.<span class="prop">body</span>.<span class="fn">appendChild</span>(<span class="prop">image</span>);
+};</pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="infobox info">
+    <span class="infobox-icon">🔍</span>
+    <div><strong>What Webpack does behind the scenes:</strong> When Webpack sees <code>System.import()</code>, it automatically creates a separate <code>0.bundle.js</code> file for that module. It also injects JSONP code into the main <code>bundle.js</code> to handle fetching chunks from the server dynamically.</div>
+  </div>
+
+  <div class="flow-diagram">
+    <div class="flow-box">
+      <div class="fb-label">initial load</div>
+      <div class="fb-name">bundle.js</div>
+      <div class="fb-desc">index.js + button</div>
+    </div>
+    <div class="flow-arrow">→ click</div>
+    <div class="flow-box">
+      <div class="fb-label">fetched on demand</div>
+      <div class="fb-name">0.bundle.js</div>
+      <div class="fb-desc">image_viewer code</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box">
+      <div class="fb-label">executes</div>
+      <div class="fb-name">module.default()</div>
+      <div class="fb-desc">shows image</div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════ -->
+<!-- SECTION 9: WEBPACK DEV SERVER -->
+<!-- ══════════════════════════════════════════ -->
+<section class="section" id="s9">
+  <div class="section-header">
+    <div class="section-icon" style="background:rgba(52,211,153,0.12);border:1px solid rgba(52,211,153,0.2)">🖥️</div>
+    <div>
+      <h2 style="color:var(--accent3)">9. Webpack Dev Server</h2>
+      <p>Auto-rebuild, hot reload, in-memory serving</p>
+    </div>
+  </div>
+
+  <div class="analogy">
+    <div class="analogy-label">Real-world analogy</div>
+    <p style="font-size:0.88rem;color:var(--dim)">Without webpack-dev-server, you're like a sculptor who has to rebuild the entire statue every time you change one inch. With dev-server, it's like a <strong style="color:var(--text)">live preview</strong> — touch one part and only that part updates instantly.</p>
+  </div>
+
+  <div class="steps">
+    <div class="step">
+      <span class="step-num">step 1</span>
+      <h3 style="color:var(--accent3)">Install webpack-dev-server</h3>
+      <div class="code-wrap">
+        <div class="code-header">
+          <div class="code-filename">terminal</div>
+          <button class="copy-btn" onclick="copyCode(this)">copy</button>
+        </div>
+        <pre><span class="fn">npm</span> install <span class="val">--save-dev</span> <span class="str">webpack-dev-server</span><span class="val">@2.2.0-rc.0</span></pre>
+      </div>
+    </div>
+    <div class="step">
+      <span class="step-num">step 2</span>
+      <h3 style="color:var(--accent3)">Add serve script to package.json</h3>
+      <div class="code-wrap">
+        <div class="code-header">
+          <div class="code-filename">package.json</div>
+          <button class="copy-btn" onclick="copyCode(this)">copy</button>
+        </div>
+        <pre>{
+  <span class="prop">"scripts"</span>: {
+    <span class="prop">"build"</span>: <span class="str">"webpack --mode production"</span>,
+    <span class="prop">"serve"</span>: <span class="str">"webpack-dev-server"</span>
+  }
+}</pre>
+      </div>
+    </div>
+    <div class="step">
+      <span class="step-num">step 3</span>
+      <h3 style="color:var(--accent3)">Start the dev server</h3>
+      <div class="code-wrap">
+        <div class="code-header">
+          <div class="code-filename">terminal</div>
+          <button class="copy-btn" onclick="copyCode(this)">copy</button>
+        </div>
+        <pre><span class="fn">npm</span> run <span class="str">serve</span>
+<span class="cmt"># App available at → http://localhost:8080</span></pre>
+      </div>
+    </div>
+  </div>
+
+  <table class="btable">
+    <thead>
+      <tr><th>Feature</th><th>npm run build</th><th>webpack-dev-server</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Output files</td><td class="code">Written to disk (dist/)</td><td class="highlight">In memory only — no files!</td></tr>
+      <tr><td>On file change</td><td>Must re-run manually</td><td class="highlight">Auto-rebuilds changed module only</td></tr>
+      <tr><td>Rebuild scope</td><td>Full project</td><td class="highlight">Only the changed file</td></tr>
+      <tr><td>Use case</td><td>Production builds</td><td class="highlight">Development only</td></tr>
+      <tr><td>Access via</td><td>Open index.html file</td><td class="highlight">localhost:8080</td></tr>
+    </tbody>
+  </table>
+
+  <div class="infobox danger">
+    <span class="infobox-icon">🚨</span>
+    <div><strong>Important:</strong> webpack-dev-server stores all files <strong>in memory</strong>, not on disk. If you need portable build output, you must run <code>npm run build</code>. Also — if you change <code>webpack.config.js</code>, you must <strong>restart</strong> the dev server.</div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════ -->
+<!-- SECTION 10: REACT CODE SPLITTING -->
+<!-- ══════════════════════════════════════════ -->
+<section class="section" id="s10">
+  <div class="section-header">
+    <div class="section-icon" style="background:rgba(251,146,60,0.12);border:1px solid rgba(251,146,60,0.2)">⚛️</div>
+    <div>
+      <h2 style="color:var(--accent4)">10. React Code Splitting with React Router</h2>
+      <p>Load routes on demand using getComponent + System.import</p>
+    </div>
+  </div>
+
+  <div class="analogy">
+    <div class="analogy-label">Real-world analogy</div>
+    <p style="font-size:0.88rem;color:var(--dim)">Imagine a large book. Instead of printing every chapter when someone buys it, you <strong style="color:var(--text)">print chapters on demand</strong> — only when the reader asks for them. Routes = chapters. Code splitting = print on demand.</p>
+  </div>
+
+  <div class="infobox info">
+    <span class="infobox-icon">ℹ️</span>
+    <div><strong>Strategy:</strong> Keep commonly visited routes (Home, ArtistMain) in the main bundle. Lazily load less-common routes (ArtistCreate, ArtistDetail, ArtistEdit) only when the user navigates to them.</div>
+  </div>
+
+  <div class="steps">
+    <div class="step">
+      <span class="step-num">before</span>
+      <h3 style="color:var(--accent4)">Old approach — all routes loaded upfront (JSX style)</h3>
+      <div class="code-wrap">
+        <div class="code-header">
+          <div class="code-filename">router.js — before</div>
+          <button class="copy-btn" onclick="copyCode(this)">copy</button>
+        </div>
+        <pre><span class="cmt">// All components imported at the top = loaded immediately</span>
+<span class="kw">import</span> <span class="prop">ArtistCreate</span> <span class="kw">from</span> <span class="str">'./components/artists/ArtistCreate'</span>;
+<span class="kw">import</span> <span class="prop">ArtistDetail</span> <span class="kw">from</span> <span class="str">'./components/artists/ArtistDetail'</span>;
+<span class="kw">import</span> <span class="prop">ArtistEdit</span>   <span class="kw">from</span> <span class="str">'./components/artists/ArtistEdit'</span>;
+
+<span class="cmt">// JSX-based routes (all loaded at once)</span>
+<span class="tag-c">&lt;Route</span> <span class="attr">path</span>=<span class="str">"/"</span> <span class="attr">component</span>=<span class="val">{Home}</span><span class="tag-c">&gt;</span>
+  <span class="tag-c">&lt;IndexRoute</span> <span class="attr">component</span>=<span class="val">{ArtistMain}</span> <span class="tag-c">/&gt;</span>
+  <span class="tag-c">&lt;Route</span> <span class="attr">path</span>=<span class="str">"artists/new"</span> <span class="attr">component</span>=<span class="val">{ArtistCreate}</span> <span class="tag-c">/&gt;</span>
+<span class="tag-c">&lt;/Route&gt;</span></pre>
+      </div>
+    </div>
+    <div class="step">
+      <span class="step-num">after</span>
+      <h3 style="color:var(--accent4)">New approach — plain routes with getComponent</h3>
+      <div class="code-wrap">
+        <div class="code-header">
+          <div class="code-filename">router.js — after (code splitting)</div>
+          <button class="copy-btn" onclick="copyCode(this)">copy</button>
+        </div>
+        <pre><span class="cmt">// Remove the import statements for lazily loaded components!</span>
+<span class="cmt">// Only keep Home and ArtistMain (loaded upfront)</span>
+<span class="kw">import</span> <span class="prop">Home</span> <span class="kw">from</span> <span class="str">'./components/Home'</span>;
+<span class="kw">import</span> <span class="prop">ArtistMain</span> <span class="kw">from</span> <span class="str">'./components/artists/ArtistMain'</span>;
+
+<span class="kw">const</span> <span class="prop">componentRoutes</span> = {
+  <span class="prop">component</span>: <span class="prop">Home</span>,
+  <span class="prop">path</span>: <span class="str">'/'</span>,
+  <span class="prop">indexRoute</span>: { <span class="prop">component</span>: <span class="prop">ArtistMain</span> },
+  <span class="prop">childRoutes</span>: [
+    {
+      <span class="prop">path</span>: <span class="str">'artists/new'</span>,
+      <span class="cmt">// getComponent = lazy loading hook</span>
+      <span class="cmt">// location: current URL, cb: callback to pass component</span>
+      <span class="fn">getComponent</span>(<span class="prop">location</span>, <span class="prop">cb</span>) {
+        <span class="fn">System</span>.<span class="fn">import</span>(<span class="str">'./components/artists/ArtistCreate'</span>)
+          .<span class="fn">then</span>(<span class="prop">module</span> <span class="op">=&gt;</span> <span class="fn">cb</span>(<span class="kw">null</span>, <span class="prop">module</span>.<span class="prop">default</span>));
+        <span class="cmt">//                              ↑ null = no error</span>
+        <span class="cmt">//                                       ↑ .default = actual component</span>
+      }
+    },
+    {
+      <span class="prop">path</span>: <span class="str">'artists/:id'</span>,
+      <span class="fn">getComponent</span>(<span class="prop">location</span>, <span class="prop">cb</span>) {
+        <span class="fn">System</span>.<span class="fn">import</span>(<span class="str">'./components/artists/ArtistDetail'</span>)
+          .<span class="fn">then</span>(<span class="prop">module</span> <span class="op">=&gt;</span> <span class="fn">cb</span>(<span class="kw">null</span>, <span class="prop">module</span>.<span class="prop">default</span>));
+      }
+    },
+    {
+      <span class="prop">path</span>: <span class="str">'artists/:id/edit'</span>,
+      <span class="fn">getComponent</span>(<span class="prop">location</span>, <span class="prop">cb</span>) {
+        <span class="fn">System</span>.<span class="fn">import</span>(<span class="str">'./components/artists/ArtistEdit'</span>)
+          .<span class="fn">then</span>(<span class="prop">module</span> <span class="op">=&gt;</span> <span class="fn">cb</span>(<span class="kw">null</span>, <span class="prop">module</span>.<span class="prop">default</span>));
+      }
+    }
+  ]
+};
+
+<span class="cmt">// Pass routes object to Router instead of JSX children</span>
+<span class="tag-c">&lt;Router</span> <span class="attr">history</span>=<span class="val">{history}</span> <span class="attr">routes</span>=<span class="val">{componentRoutes}</span> <span class="tag-c">/&gt;</span></pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="infobox warn">
+    <span class="infobox-icon">⚠️</span>
+    <div><strong>Cannot dynamically build the path string!</strong> Webpack scans your code statically for <code>System.import()</code> calls. The path must be a <strong>literal string</strong> — you can't generate it dynamically with string concatenation or variables.</div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════ -->
+<!-- SECTION 11: STATIC DEPLOYMENT -->
+<!-- ══════════════════════════════════════════ -->
+<section class="section" id="s11">
+  <div class="section-header">
+    <div class="section-icon" style="background:rgba(244,114,182,0.12);border:1px solid rgba(244,114,182,0.2)">🚀</div>
+    <div>
+      <h2 style="color:var(--accent5)">11. Static Deployment Prep</h2>
+      <p>Production optimizations before deploying</p>
+    </div>
+  </div>
+
+  <div class="analogy">
+    <div class="analogy-label">Real-world analogy</div>
+    <p style="font-size:0.88rem;color:var(--dim)">Before publishing a book, you <strong style="color:var(--text)">proofread, remove filler words, and print the final edition</strong>. Production build does the same — removes debug checks, minifies code, and ships the leanest possible version.</p>
+  </div>
+
+  <div class="steps">
+    <div class="step">
+      <span class="step-num">step 1</span>
+      <h3 style="color:var(--accent5)">Add DefinePlugin — set NODE_ENV for production React</h3>
+      <p>React checks for <code>process.env.NODE_ENV === 'production'</code>. When set, React skips extensive error checking, making it significantly faster.</p>
+      <div class="code-wrap">
+        <div class="code-header">
+          <div class="code-filename">webpack.config.js</div>
+          <button class="copy-btn" onclick="copyCode(this)">copy</button>
+        </div>
+        <pre><span class="kw">const</span> <span class="prop">webpack</span> = <span class="fn">require</span>(<span class="str">'webpack'</span>);
+
+<span class="prop">plugins</span>: [
+  <span class="cmt">// Defines a global variable in the browser scope</span>
+  <span class="cmt">// React reads this to skip development checks in production</span>
+  <span class="kw">new</span> <span class="prop">webpack</span>.<span class="fn">DefinePlugin</span>({
+    <span class="str">'process.env.NODE_ENV'</span>: <span class="fn">JSON</span>.<span class="fn">stringify</span>(<span class="prop">process</span>.<span class="prop">env</span>.<span class="prop">NODE_ENV</span>)
+  })
+]</pre>
+      </div>
+    </div>
+    <div class="step">
+      <span class="step-num">step 2</span>
+      <h3 style="color:var(--accent5)">Update build script in package.json</h3>
+      <p>Add <code>NODE_ENV=production</code> and the <code>-p</code> flag. The <code>-p</code> flag tells Webpack to minify all output — removing spaces, renaming variables, stripping comments (20–30% smaller files).</p>
+      <div class="code-wrap">
+        <div class="code-header">
+          <div class="code-filename">package.json</div>
+          <button class="copy-btn" onclick="copyCode(this)">copy</button>
+        </div>
+        <pre>{
+  <span class="prop">"scripts"</span>: {
+    <span class="cmt">// NODE_ENV=production → sets env variable</span>
+    <span class="cmt">// -p → minify output (20-30% smaller!)</span>
+    <span class="prop">"build"</span>: <span class="str">"NODE_ENV=production webpack -p"</span>,
+    <span class="prop">"serve"</span>: <span class="str">"webpack-dev-server"</span>
+  }
+}</pre>
+      </div>
+    </div>
+  </div>
+
+  <table class="btable">
+    <thead>
+      <tr><th>Optimization</th><th>How</th><th>Benefit</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>NODE_ENV = production</td><td class="code">DefinePlugin + env var</td><td>React skips dev-only checks → faster</td></tr>
+      <tr><td>Minification</td><td class="code">webpack -p flag</td><td class="highlight">20–30% smaller bundle size</td></tr>
+      <tr><td>Variable renaming</td><td>Auto with -p</td><td>Shorter variable names = less bytes</td></tr>
+      <tr><td>Comment stripping</td><td>Auto with -p</td><td>All comments removed from output</td></tr>
+    </tbody>
+  </table>
+
+  <div class="infobox success">
+    <span class="infobox-icon">🚀</span>
+    <div><strong>Quickest deployment — Surge.sh:</strong> After running <code>npm run build</code>, install Surge and run it in your build directory. Takes about 3 minutes to get live on the internet.</div>
+  </div>
+
+  <div class="code-wrap">
+    <div class="code-header">
+      <div class="code-filename">terminal — deploy with surge</div>
+      <button class="copy-btn" onclick="copyCode(this)">copy</button>
+    </div>
+    <pre><span class="cmt"># Build for production first</span>
+<span class="fn">npm</span> run <span class="str">build</span>
+
+<span class="cmt"># Install surge globally</span>
+<span class="fn">npm</span> install <span class="val">-g</span> <span class="str">surge</span>
+
+<span class="cmt"># Deploy your build folder</span>
+<span class="fn">surge</span> <span class="str">./build</span></pre>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════ -->
+<!-- SECTION 12: PACKAGE.JSON FOR JIRA PLUGIN  -->
+<!-- ══════════════════════════════════════════ -->
+<section class="section" id="s12">
+  <div class="section-header">
+    <div class="section-icon" style="background:rgba(52,211,153,0.12);border:1px solid rgba(52,211,153,0.2)">📦</div>
+    <div>
+      <h2 style="color:var(--accent3)">12. package.json — Custom Webpack for Jira Plugin</h2>
+      <p>Ditch CRA, use custom webpack for predictable output filenames</p>
+    </div>
+  </div>
+
+  <div class="analogy">
+    <div class="analogy-label">Real-world analogy</div>
+    <p style="font-size:0.88rem;color:var(--dim)">CRA is like an <strong style="color:var(--text)">all-inclusive resort</strong> — great for standalone apps but too opinionated for embedding inside Jira. Custom webpack is like <strong style="color:var(--text)">renting your own apartment</strong> — more setup, but full control over what goes where.</p>
+  </div>
+
+  <!-- Problems -->
+  <div class="infobox danger">
+    <span class="infobox-icon">🚨</span>
+    <div>
+      <strong>3 problems with a typical CRA-based package.json for Jira:</strong><br><br>
+      <strong>1. Two build systems fighting</strong> — <code>react-scripts</code> uses its own internal webpack. Your custom <code>webpack.config.js</code> loaders (babel-loader, css-loader etc.) are completely ignored.<br><br>
+      <strong>2. React 19 + react-scripts 5 incompatibility</strong> — <code>react-scripts@5.0.1</code> was built for React 17/18. React 19 breaks it with peer dependency errors.<br><br>
+      <strong>3. Hashed/chunked output</strong> — CRA generates <code>main.f855e6bc.js</code>, <code>845.ee2883ba.chunk.js</code> etc. Jira's velocity templates need fixed, predictable filenames like <code>main.js</code>.
+    </div>
+  </div>
+
+  <!-- Before/After comparison -->
+  <div class="compare" style="margin:20px 0">
+    <div class="compare-card">
+      <div class="compare-head" style="background:rgba(248,113,113,0.1);color:var(--red)">❌ Problematic (CRA-based)</div>
+      <div class="compare-body">
+        <p class="con">react-scripts in dependencies</p>
+        <p class="con">React 19 breaks react-scripts 5</p>
+        <p class="con">No webpack / webpack-cli</p>
+        <p class="con">No @babel/preset-react (JSX broken)</p>
+        <p class="con">url-loader redundant in Webpack 5</p>
+        <p class="con">style-loader wrong for Jira plugin</p>
+      </div>
+    </div>
+    <div class="compare-card">
+      <div class="compare-head" style="background:rgba(52,211,153,0.1);color:var(--accent3)">✅ Fixed (Custom Webpack)</div>
+      <div class="compare-body">
+        <p class="pro">react-scripts removed entirely</p>
+        <p class="pro">React 18 — stable, widely supported</p>
+        <p class="pro">webpack + webpack-cli + webpack-dev-server</p>
+        <p class="pro">@babel/preset-react added for JSX</p>
+        <p class="pro">asset/resource replaces url-loader</p>
+        <p class="pro">MiniCssExtractPlugin for separate CSS</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Fixed package.json -->
+  <div class="code-wrap">
+    <div class="code-header">
+      <div class="code-filename"><div class="code-dot" style="background:#ff5f57"></div><div class="code-dot" style="background:#febc2e"></div><div class="code-dot" style="background:#28c840"></div>&nbsp; package.json — clean custom webpack setup</div>
+      <button class="copy-btn" onclick="copyCode(this)">copy</button>
+    </div>
+    <pre>{
+  <span class="prop">"name"</span>: <span class="str">"frontend"</span>,
+  <span class="prop">"version"</span>: <span class="str">"0.1.0"</span>,
+  <span class="prop">"private"</span>: <span class="kw">true</span>,
+  <span class="prop">"dependencies"</span>: {
+    <span class="cmt">// React 18 — stable, widely supported, works with all tooling</span>
+    <span class="prop">"react"</span>: <span class="str">"^18.2.0"</span>,
+    <span class="prop">"react-dom"</span>: <span class="str">"^18.2.0"</span>
+  },
+  <span class="prop">"scripts"</span>: {
+    <span class="cmt">// webpack replaces react-scripts — predictable output filenames</span>
+    <span class="prop">"build"</span>: <span class="str">"webpack --mode production"</span>,
+    <span class="prop">"start"</span>: <span class="str">"webpack serve --mode development"</span>,
+    <span class="prop">"test"</span>: <span class="str">"jest"</span>
+  },
+  <span class="prop">"browserslist"</span>: {
+    <span class="prop">"production"</span>: [<span class="str">"&gt;0.2%"</span>, <span class="str">"not dead"</span>, <span class="str">"not op_mini all"</span>],
+    <span class="prop">"development"</span>: [<span class="str">"last 1 chrome version"</span>, <span class="str">"last 1 firefox version"</span>]
+  },
+  <span class="prop">"devDependencies"</span>: {
+    <span class="cmt">// Babel core + presets</span>
+    <span class="prop">"@babel/core"</span>: <span class="str">"^7.29.0"</span>,
+    <span class="prop">"@babel/preset-env"</span>: <span class="str">"^7.29.0"</span>,
+    <span class="prop">"@babel/preset-react"</span>: <span class="str">"^7.18.6"</span>,  <span class="cmt">// ← REQUIRED for JSX</span>
+    <span class="prop">"babel-loader"</span>: <span class="str">"^10.1.0"</span>,
+
+    <span class="cmt">// CSS handling</span>
+    <span class="prop">"css-loader"</span>: <span class="str">"^7.1.4"</span>,
+    <span class="prop">"mini-css-extract-plugin"</span>: <span class="str">"^2.9.0"</span>,  <span class="cmt">// ← extracts to main.css</span>
+
+    <span class="cmt">// Webpack 5 core</span>
+    <span class="prop">"webpack"</span>: <span class="str">"^5.105.0"</span>,
+    <span class="prop">"webpack-cli"</span>: <span class="str">"^5.1.0"</span>,
+    <span class="prop">"webpack-dev-server"</span>: <span class="str">"^5.0.0"</span>
+
+    <span class="cmt">// REMOVED: react-scripts, url-loader, image-webpack-loader,</span>
+    <span class="cmt">// style-loader — not needed with custom webpack 5 setup</span>
+  }
+}</pre>
+  </div>
+
+  <!-- Change table -->
+  <table class="btable" style="margin:20px 0">
+    <thead>
+      <tr><th>Package</th><th>Action</th><th>Reason</th></tr>
+    </thead>
+    <tbody>
+      <tr><td class="code">react-scripts</td><td style="color:var(--red)">❌ Removed</td><td>Replaced by custom webpack — caused build conflicts</td></tr>
+      <tr><td class="code">react@19</td><td style="color:var(--yellow)">⬇ Downgraded to 18</td><td>React 19 breaks react-scripts 5 and many ecosystem packages</td></tr>
+      <tr><td class="code">@babel/preset-react</td><td style="color:var(--accent3)">✅ Added</td><td>Required to transpile JSX — was missing entirely</td></tr>
+      <tr><td class="code">webpack + webpack-cli</td><td style="color:var(--accent3)">✅ Added</td><td>Required to run webpack.config.js</td></tr>
+      <tr><td class="code">webpack-dev-server</td><td style="color:var(--accent3)">✅ Added</td><td>Required for <code>npm start</code> dev mode</td></tr>
+      <tr><td class="code">mini-css-extract-plugin</td><td style="color:var(--accent3)">✅ Added</td><td>Extracts CSS to predictable <code>main.css</code> file</td></tr>
+      <tr><td class="code">url-loader</td><td style="color:var(--red)">❌ Removed</td><td>Webpack 5 has <code>asset/resource</code> built-in</td></tr>
+      <tr><td class="code">image-webpack-loader</td><td style="color:var(--red)">❌ Removed</td><td>Not needed — use <code>asset/resource</code> instead</td></tr>
+      <tr><td class="code">style-loader</td><td style="color:var(--red)">❌ Removed</td><td>Wrong for Jira plugin — use MiniCssExtractPlugin instead</td></tr>
+      <tr><td class="code">@testing-library/*</td><td style="color:var(--red)">❌ Removed</td><td>Add back only if setting up jest separately</td></tr>
+    </tbody>
+  </table>
+
+  <!-- babelrc reminder -->
+  <div class="infobox warn">
+    <span class="infobox-icon">⚠️</span>
+    <div><strong>Update your .babelrc too!</strong> Add <code>@babel/preset-react</code> or JSX won't transpile:</div>
+  </div>
+  <div class="code-wrap">
+    <div class="code-header">
+      <div class="code-filename">.babelrc</div>
+      <button class="copy-btn" onclick="copyCode(this)">copy</button>
+    </div>
+    <pre>{
+  <span class="prop">"presets"</span>: [
+    <span class="str">"@babel/preset-env"</span>,
+    <span class="str">"@babel/preset-react"</span>   <span class="cmt">// ← add this</span>
+  ]
+}</pre>
+  </div>
+
+  <!-- Clean install -->
+  <div class="infobox success">
+    <span class="infobox-icon">✅</span>
+    <div><strong>After updating package.json, always do a clean install:</strong></div>
+  </div>
+  <div class="code-wrap">
+    <div class="code-header">
+      <div class="code-filename">PowerShell (Windows)</div>
+      <button class="copy-btn" onclick="copyCode(this)">copy</button>
+    </div>
+    <pre><span class="cmt"># Delete old node_modules and lock file</span>
+<span class="fn">Remove-Item</span> <span class="val">-Recurse -Force</span> node_modules
+<span class="fn">Remove-Item</span> package-lock.json
+
+<span class="cmt"># Fresh install</span>
+<span class="fn">npm</span> install</pre>
+  </div>
+
+  <!-- webpack output for jira -->
+  <div class="infobox info">
+    <span class="infobox-icon">🏗️</span>
+    <div><strong>Expected build output after fix:</strong> Instead of CRA's hashed chunks, you'll get clean predictable files Jira can reference:<br><br>
+    <code style="color:var(--accent3)">build/main.js</code> — single JS bundle<br>
+    <code style="color:var(--accent3)">build/main.css</code> — extracted stylesheet<br><br>
+    Reference these in your <code>atlassian-plugin.xml</code> web-resource with fixed paths that never change between builds.</div>
+  </div>
+</section>
+
+</main>
+</div>
+
+<script>
+function copyCode(btn) {
+  const pre = btn.closest('.code-wrap').querySelector('pre');
+  const text = pre.innerText;
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = 'copied!';
+    btn.style.color = 'var(--accent3)';
+    btn.style.borderColor = 'var(--accent3)';
+    setTimeout(() => {
+      btn.textContent = 'copy';
+      btn.style.color = '';
+      btn.style.borderColor = '';
+    }, 2000);
+  });
+}
+
+// Sidebar active state on scroll
+const sections = document.querySelectorAll('section[id]');
+const navItems = document.querySelectorAll('.nav-item');
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      navItems.forEach(n => n.classList.remove('active'));
+      const active = document.querySelector(`.nav-item[href="#${e.target.id}"]`);
+      if (active) active.classList.add('active');
+    }
+  });
+}, { threshold: 0.3 });
+sections.forEach(s => observer.observe(s));
+</script>
+</body>
+</html>

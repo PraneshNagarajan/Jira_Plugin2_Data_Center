@@ -1,0 +1,9 @@
+{
+  "packageName": "my-app",
+  "outputDirectoryFiles": [
+    "css/app.css",
+    "js/bundled.app.js",
+    "images/react.svg",
+    "js/bundled.app.js.LICENSE.txt"
+  ]
+}
