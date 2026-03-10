@@ -25,6 +25,7 @@ public class MyPluginServlet extends HttpServlet {
         Map<String, Object> context = new HashMap<>();
         res.setContentType("text/html;charset=UTF-8");
         context.put("contextPath", req.getContextPath());
+        context.put("baseurl", "http://localhost:2990");
         templateRenderer.render("templates/app.vm", context, res.getWriter());
     }
 }

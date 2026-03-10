@@ -9,8 +9,8 @@
 <body>
     <div id="container" >
     </div>
-<div>
-    <input class="text" type="text" id="contextPath" name="contextPath" >
+<div class="hidden">
+    <input class="text" type="text" id="contextPath" name="contextPath" value="$!{baseurl}$!{contextPath}">
 </div>
 </body>
 </html>
