@@ -60,15 +60,15 @@ atlassian-webresource-webpack-plugin
 When you switch to your own `webpack.config.js`, babel is no longer called automatically. You need `.babelrc` to tell webpack's `babel-loader` how to compile your `.tsx`/`.jsx`:
 
 ```
-WITHOUT .babelrc                  WITH .babelrc
-────────────────────              ────────────────────
-webpack sees .tsx                 webpack sees .tsx
-      ↓                                 ↓
-babel-loader has no config        babel-loader reads .babelrc
-      ↓                                 ↓
-❌ doesn't know how to            ✅ compiles TSX → JS
-   handle JSX/TS                  ✅ handles spread operator
-                                  ✅ handles modern JS syntax
+  WITH .babelrc
+ ────────────────────
+ webpack sees .tsx|.jsx
+      ↓                                 
+ babel-loader reads .babelrc
+      ↓                                 
+✅ compiles TSX|JSX → JS
+✅ handles spread operator
+✅ handles modern JS syntax
 ```
 
 ---
