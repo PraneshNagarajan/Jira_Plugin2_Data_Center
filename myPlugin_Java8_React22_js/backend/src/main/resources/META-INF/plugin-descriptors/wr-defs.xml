@@ -1,0 +1,19 @@
+<bundles>
+  <web-resource key="entrypoint-app">
+    <transformation extension="js">
+      <transformer key="jsI18n"/>
+    </transformation>
+    <context>app</context>
+    <resource type="download" name="css/app.css" location="frontend/css/app.css"/>
+    <resource type="download" name="js/bundled.app.js" location="frontend/js/bundled.app.js"/>
+    <resource type="download" name="images/react.svg" location="frontend/images/react.svg">
+      <param name="content-type" value="image/svg+xml"/>
+    </resource>
+  </web-resource>
+  <web-resource key="assets-f9d2256a-9738-4137-b344-59914904a499">
+    <resource type="download" name="images/react.svg" location="frontend/images/react.svg">
+      <param name="content-type" value="image/svg+xml"/>
+    </resource>
+    <resource type="download" name="js/bundled.app.js.LICENSE.txt" location="frontend/js/bundled.app.js.LICENSE.txt"/>
+  </web-resource>
+</bundles>

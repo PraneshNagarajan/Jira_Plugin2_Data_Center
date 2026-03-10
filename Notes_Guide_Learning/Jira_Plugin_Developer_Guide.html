@@ -79,6 +79,7 @@ html, body { width:100%; height:100%; overflow:hidden; background:var(--bg); col
   display:flex; flex-direction:column; gap:0;
 }
 
+
 /* ══════════════════════════════════════════
    SLIDE HEADER
 ══════════════════════════════════════════ */
@@ -640,52 +641,28 @@ code { font-family:'Fira Code',monospace; font-size:0.82em; background:rgba(251,
 <span class="tok-p">OSGi Java Config</span>: N
 <span class="tok-p">Confirm (Y)</span>: Y</pre>
       </div>
-      <div class="code-wrap">
-        <div class="code-label"><div class="code-filename">Step 2 — Frontend dependencies (frontend/my-app/)</div><button class="copy-btn" onclick="copyCode(this)">⧉ Copy</button></div>
-        <pre><span class="tok-fn">npx</span> create-react-app my-app <span class="tok-v">--template typescript</span>
-<span class="tok-fn">cd</span> my-app
-
-<span class="tok-c"># Webpack + Atlassian WRM plugin</span>
-<span class="tok-fn">npm</span> install --save-dev atlassian-webresource-webpack-plugin
-<span class="tok-fn">npm</span> install --save-dev webpack webpack-cli ts-loader typescript
-<span class="tok-fn">npm</span> install --save-dev mini-css-extract-plugin css-loader
-
-<span class="tok-c"># Downgrade React to 16 (REQUIRED for Jira DC)</span>
-<span class="tok-fn">npm</span> install react@^16.14.0 react-dom@^16.14.0
-
-<span class="tok-c"># Pin @types EXACT — ^ resolves to v19+ which removes ReactDOM.render()</span>
-<span class="tok-fn">npm</span> install --save-dev @types/react@16.9.0 @types/react-dom@16.9.0 --legacy-peer-deps
-
-<span class="tok-c"># Fix testing-library conflict (v16 requires React 18)</span>
-<span class="tok-fn">npm</span> install @testing-library/react@12 --save-dev --legacy-peer-deps</pre>
-      </div>
-    </div>
-    <div style="display:flex;flex-direction:column;gap:10px">
-      <div class="callout danger">
-        <div class="callout-icon">🚫</div>
-        <p><strong>Must use React 16 for Jira Data Center!</strong><br>React 18 uses <code>ReactDOM.createRoot()</code> which conflicts with Jira's DOM lifecycle. Always install <code>react@^16.14.0</code> and <code>react-dom@^16.14.0</code>.</p>
-      </div>
-      <div class="callout danger">
-        <div class="callout-icon">🚫</div>
-        <p><strong>Pin @types versions exactly — NO ^ or ~ prefix!</strong><br><code>@types/react@^16</code> resolves to v19+ (types have independent versioning). React 18+ types removed <code>ReactDOM.render()</code> → TypeScript error on React 16.</p>
-      </div>
-      <div class="callout warn">
-        <div class="callout-icon">⚠️</div>
-        <p><strong>ERESOLVE peer conflict:</strong> <code>@testing-library/react@16</code> requires react@^18. Fix: install v12, the last version compatible with React 16, using <code>--legacy-peer-deps</code>.</p>
-      </div>
       <div class="card card-amber" style="margin-top:2px">
         <div class="card-label amber">📦 Key Dependencies Summary</div>
         <ul>
-          <li><code>react@^16.14.0</code> — Core React (must be 16)</li>
-          <li><code>react-dom@^16.14.0</code> — DOM mounting (DEFAULT import, not * as)</li>
-          <li><code>@types/react@16.9.0</code> — TypeScript types — EXACT pin</li>
-          <li><code>@types/react-dom@16.9.0</code> — TypeScript types — EXACT pin</li>
           <li><code>atlassian-webresource-webpack-plugin</code> — generates wr-defs.xml</li>
           <li><code>webpack + webpack-cli + ts-loader + typescript</code> — build toolchain</li>
           <li><code>mini-css-extract-plugin + css-loader</code> — CSS extraction</li>
         </ul>
       </div>
     </div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div class="code-wrap">
+<div class="code-label"><div class="code-filename">Step 2 — Frontend dependencies (frontend)</div><button class="copy-btn" onclick="copyCode(this)">⧉ Copy</button></div>
+<pre><span class="tok-fn">npx</span> create-react-app frontend
+<span class="tok-fn">cd</span> frontend
+<span class="tok-c"># Webpack + Atlassian WRM plugin</span>
+<span class="tok-c"># All packages are defined in package.json</span>
+<span class="tok-c"># Refer package.json → install all dependencies at once</span>
+<span class="tok-fn">npm</span> install 
+<br><br>
+      </div>
+    </div>
+      
   </div>
 </div>
 
@@ -724,7 +701,7 @@ code { font-family:'Fira Code',monospace; font-size:0.82em; background:rgba(251,
 
   <span class="tok-p">module</span>: {
     <span class="tok-p">rules</span>: [
-      { <span class="tok-p">test</span>: <span class="tok-r">/\.tsx?$/</span>, <span class="tok-p">exclude</span>: <span class="tok-r">/node_modules/</span>, <span class="tok-p">use</span>: <span class="tok-s">'ts-loader'</span> },
+      { <span class="tok-p">test</span>: <span class="tok-r">/\.(tsx|ts|js|jsx)?$/</span>, <span class="tok-p">exclude</span>: <span class="tok-r">/node_modules/</span>, <span class="tok-p">use</span>: <span class="tok-s">'ts-loader'</span> },
       { <span class="tok-p">test</span>: <span class="tok-r">/\.css$/</span>,  <span class="tok-p">use</span>: [MiniCssExtractPlugin.<span class="tok-p">loader</span>, <span class="tok-s">'css-loader'</span>] },
       { <span class="tok-p">test</span>: <span class="tok-r">/\.(svg|png|jpg|jpeg|gif|ico)$/</span>,
         <span class="tok-p">type</span>: <span class="tok-s">'asset/resource'</span>,
@@ -751,7 +728,7 @@ code { font-family:'Fira Code',monospace; font-size:0.82em; background:rgba(251,
         <table>
           <thead><tr><th>Loader</th><th>File types</th><th>Output</th></tr></thead>
           <tbody>
-            <tr><td class="mono">ts-loader</td><td>.tsx, .ts</td><td class="green">→ JavaScript</td></tr>
+            <tr><td class="mono">babel-loader</td><td>.tsx, .ts, .jsx</td><td class="green">→ JavaScript</td></tr>
             <tr><td class="mono">css-loader + MiniCss</td><td>.css</td><td class="green">→ css/app.css</td></tr>
             <tr><td class="mono">asset/resource</td><td>.svg .png .jpg .gif .ico</td><td class="green">→ images/[name][ext]</td></tr>
           </tbody>
@@ -807,29 +784,6 @@ code { font-family:'Fira Code',monospace; font-size:0.82em; background:rgba(251,
       </div>
     </div>
     <div>
-      <div class="card card-violet" style="margin-bottom:10px">
-        <div class="card-label violet">📦 package.json — Key Dependencies</div>
-        <ul>
-          <li><strong style="color:var(--text)">react@^16.14.0</strong> — must be 16 for Jira DC</li>
-          <li><strong style="color:var(--text)">react-dom@^16.14.0</strong> — DEFAULT import (not <code>* as ReactDOM</code>)</li>
-          <li><strong style="color:var(--text)">@types/react@16.9.0</strong> — EXACT pin — no ^ or ~</li>
-          <li><strong style="color:var(--text)">@types/react-dom@16.9.0</strong> — EXACT pin — no ^ or ~</li>
-          <li><strong style="color:var(--text)">atlassian-webresource-webpack-plugin</strong> — generates wr-defs.xml</li>
-          <li><strong style="color:var(--text)">webpack + webpack-cli + ts-loader + typescript</strong> — build chain</li>
-          <li><strong style="color:var(--text)">mini-css-extract-plugin + css-loader</strong> — CSS extraction</li>
-        </ul>
-      </div>
-      <div class="tbl-wrap">
-        <table>
-          <thead><tr><th>Problem</th><th>Root Cause</th><th>Fix</th></tr></thead>
-          <tbody>
-            <tr><td class="mono">@types/react@^16 → v19</td><td>Types have independent versioning</td><td class="green">Pin exact: @16.9.0</td></tr>
-            <tr><td class="mono">'render' not on ReactDOM</td><td>v18+ types removed render()</td><td class="green">Default import + exact pin</td></tr>
-            <tr><td class="mono">react-jsx build fail</td><td>React 17+ only transform</td><td class="green">"jsx": "react"</td></tr>
-            <tr><td class="mono">ERESOLVE peer conflict</td><td>@testing-library needs React 18</td><td class="green">@testing-library/react@12</td></tr>
-          </tbody>
-        </table>
-      </div>
     </div>
   </div>
 </div>
