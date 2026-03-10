@@ -1,25 +1,25 @@
 # Backend
-myPlugin_Java8/backend/target/
+myPlugin_*/backend/target/
 
 # Frontend — dependencies
-myPlugin_Java8/frontend/node_modules/
-myPlugin_Java8/frontend/.pnp
-myPlugin_Java8/frontend/.pnp.js
+myPlugin_*/frontend/node_modules/
+myPlugin_*/frontend/.pnp
+myPlugin_*/frontend/.pnp.js
 
 # Frontend — testing
-myPlugin_Java8/frontend/coverage/
+myPlugin_*/frontend/coverage/
 
 # Frontend — production build
-myPlugin_Java8/frontend/build/
+myPlugin_*/frontend/build/
 
 # Frontend — misc
-myPlugin_Java8/frontend/.DS_Store
-myPlugin_Java8/frontend/.env.local
-myPlugin_Java8/frontend/.env.development.local
-myPlugin_Java8/frontend/.env.test.local
-myPlugin_Java8/frontend/.env.production.local
+myPlugin_*/frontend/.DS_Store
+myPlugin_*/frontend/.env.local
+myPlugin_*/frontend/.env.development.local
+myPlugin_*/frontend/.env.test.local
+myPlugin_*/frontend/.env.production.local
 
 # Frontend — logs
-myPlugin_Java8/frontend/npm-debug.log*
-myPlugin_Java8/frontend/yarn-debug.log*
-myPlugin_Java8/frontend/yarn-error.log*
+myPlugin_*/frontend/npm-debug.log*
+myPlugin_*/frontend/yarn-debug.log*
+myPlugin_*/frontend/yarn-error.log*
